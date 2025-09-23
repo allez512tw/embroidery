@@ -633,8 +633,17 @@ $('#copyButton').click(function() {
 });
 
 // 將表格中的所有 select 與 input 的值，換成文字顯示
-function prepareTableForEmail(tableSelector) {
-  const table = document.querySelector(tableSelector);
+function prepareTableForEmail(tableOrSelector) {
+  let table;
+  
+  // 如果傳進來的是字串，當成 selector
+  if (typeof tableOrSelector === "string") {
+    table = document.querySelector(tableOrSelector);
+  } else {
+    // 否則直接當成 DOM element
+    table = tableOrSelector;
+  }
+
   const selects = table.querySelectorAll('select');
   selects.forEach(select => {
     const selectedText = select.options[select.selectedIndex]?.text || '';
@@ -650,8 +659,16 @@ function prepareTableForEmail(tableSelector) {
   });
 }
 
-function styleTableForEmail(tableSelector) {
-  const table = document.querySelector(tableSelector);
+function styleTableForEmail(tableOrSelector) {
+  let table;
+
+  // 判斷傳進來的是 selector 還是 DOM
+  if (typeof tableOrSelector === "string") {
+    table = document.querySelector(tableOrSelector);
+  } else {
+    table = tableOrSelector;
+  }
+  
   table.setAttribute("border", "1");
   table.setAttribute("cellpadding", "8");
   table.style.borderCollapse = "collapse";
@@ -665,7 +682,6 @@ function styleTableForEmail(tableSelector) {
     cell.style.fontSize = "14px";
   });
 }
-
 
 function generateSerialNumber() {
     const prefix = "ALLEZ_";
@@ -811,6 +827,7 @@ document.getElementById("copyButton").addEventListener("click", function () {
 </script>
 
 </html>
+
 
 
 
