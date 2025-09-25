@@ -632,30 +632,50 @@ $('#copyButton').click(function() {
   $temp.remove();
 });
 
+// 同步使用者填的 input/select 值到 clone
+function syncInputValues(original, clone) {
+  const originalInputs = original.querySelectorAll('input, select, textarea');
+  const clonedInputs = clone.querySelectorAll('input, select, textarea');
+
+  originalInputs.forEach((origEl, idx) => {
+    const cloneEl = clonedInputs[idx];
+
+    if (!cloneEl) return;
+
+    if (origEl.tagName === 'SELECT') {
+      cloneEl.selectedIndex = origEl.selectedIndex;
+    } else {
+      cloneEl.value = origEl.value;
+    }
+  });
+}
+
+
 // 將表格中的所有 select 與 input 的值，換成文字顯示
 function prepareTableForEmail(tableOrSelector) {
   let table;
-  
-  // 如果傳進來的是字串，當成 selector
+
   if (typeof tableOrSelector === "string") {
     table = document.querySelector(tableOrSelector);
   } else {
-    // 否則直接當成 DOM element
     table = tableOrSelector;
   }
 
+  // 替換所有 <select> 為選項文字
   const selects = table.querySelectorAll('select');
   selects.forEach(select => {
     const selectedText = select.options[select.selectedIndex]?.text || '';
-    const td = select.closest('td');
-    td.textContent = selectedText; // 用文字取代整個 td 的內容
+    const span = document.createElement('span');
+    span.textContent = selectedText;
+    select.replaceWith(span);
   });
 
+  // 替換所有 <input> 為輸入值
   const inputs = table.querySelectorAll('input');
   inputs.forEach(input => {
-    const value = input.value;
-    const td = input.closest('td');
-    td.textContent = value; // 直接把值放進 td 裡
+    const span = document.createElement('span');
+    span.textContent = input.value;
+    input.replaceWith(span);
   });
 }
 
@@ -759,6 +779,9 @@ document.getElementById("orderForm").addEventListener("submit", function(e) {
 			// 複製一份（不影響畫面上的表格）
 			const clonedTable = originalTable.cloneNode(true);
 
+			// 👇 解決 select/input 值沒跟著複製的問題
+			syncInputValues(originalTable, clonedTable);
+
 			// 對 clone 做靜態化處理
 			prepareTableForEmail(clonedTable);
 			styleTableForEmail(clonedTable);
@@ -827,7 +850,3 @@ document.getElementById("copyButton").addEventListener("click", function () {
 </script>
 
 </html>
-
-
-
-
