@@ -101,6 +101,122 @@
     <tbody>
     <tr id="clo2">
         <td class="td2">1</td>
+<script>
+const colorMap = {
+  "A148": { "A0": "寶寶粉", "W0": "純粹白" },
+  "A204": { "A0": "寶寶粉", "B0": "寶寶藍", "W0": "純粹白" },
+  "A222": { "B0": "寶寶藍" },
+  "A246": { "A0": "寶寶粉", "C0": "丁香紫" },
+  "A248": { "A0": "寶寶粉", "W0": "純粹白" },
+  "A302": { "W0": "純粹白" },
+  "A305": { "W0": "純粹白" },
+  "A502": { "W0": "純粹白" },
+  "A505": { "W0": "純粹白" },
+
+  "AB251": { "A2": "梅子粉", "C2": "迷霧紫", "F0": "粉霧橘", "F1": "卡其灰" },
+  "AB252": { "E2": "雪松綠", "W3": "蓋亞灰", "W6": "灰蒼藍", "W7": "暗岩灰" },
+  "AB719": { "A2": "梅子粉", "B5": "北歐藍", "B7": "蔚海藍", "C2": "迷霧紫", "E2": "雪松綠", "F0": "粉霧橘", "F1": "杏仁奶", "F8": "礦物棕", "W3": "蓋亞灰", "W6": "灰蒼藍" },
+
+  "AC719": { "B9": "深海藍", "F7": "暗棗紅", "W7": "暗岩灰", "W9": "石墨黑" },
+
+  "AS136": { "W7": "暗岩灰" },
+  "AS150": { "B0": "寶寶藍", "B9": "深海藍" },
+  "AS250": { "B0": "寶寶藍", "B9": "深海藍" },
+  "AS251": { "A0": "寶寶粉", "B0": "寶寶藍", "B9": "深海藍", "W0": "純粹白" },
+  "AS716": { "A0": "寶寶粉", "C0": "丁香紫", "C7": "葡萄紫", "F1": "卡其灰", "W8": "夜幕黑" },
+  "AS7161": { "W8": "夜幕黑" },
+  "AS717": { "A9": "釀酒紅", "C7": "葡萄紫", "W6": "灰蒼藍" },
+  "AS718": { "B0": "寶寶藍", "W6": "灰蒼藍", "W7": "暗岩灰", "W8": "夜幕黑" },
+  "AS7181": { "B0": "寶寶藍", "W6": "灰蒼藍", "W7": "暗岩灰", "W8": "夜幕黑" },
+  "AS804": { "B9": "深海藍" },
+
+  "B101": { "A0": "寶寶粉", "B0": "寶寶藍" },
+  "B108": { "A0": "寶寶粉", "C0": "丁香紫", "W0": "純粹白" },
+  "B110": { "C0": "丁香紫", "D0": "天堂藍" },
+  "B111": { "A0": "寶寶粉", "B0": "寶寶藍" },
+  "B122": { "C0": "丁香紫", "D0": "天堂藍" },
+  "B133": { "A0": "寶寶粉" },
+  "B201": { "A0": "寶寶粉", "B0": "寶寶藍", "W0": "純粹白" },
+  "B202": { "W0": "純粹白" },
+  "B204": { "A0": "寶寶粉", "D0": "天堂藍", "W0": "純粹白" },
+  "B208": { "A0": "寶寶粉", "C0": "丁香紫", "W0": "純粹白" },
+  "B210": { "C0": "丁香紫", "D0": "天堂藍" },
+  "B211": { "A0": "寶寶粉", "B0": "寶寶藍", "W0": "純粹白" },
+  "B222": { "A0": "寶寶粉" },
+  "B233": { "A0": "寶寶粉" },
+  "B235": { "W0": "純粹白" },
+  "B241": { "A0": "寶寶粉", "C0": "丁香紫" },
+  "B302": { "W0": "純粹白" },
+  "B304": { "W0": "純粹白" },
+  "B305": { "W0": "純粹白" },
+  "B502": { "W0": "純粹白" },
+  "B505": { "W0": "純粹白" },
+  "B603": { "D0": "天堂藍" },
+  "B608": { "D0": "天堂藍" },
+  "B801": { "A0": "寶寶粉", "W0": "純粹白" },
+  "B802": { "A0": "寶寶粉", "W0": "純粹白" },
+
+  "C302": { "W0": "純粹白" },
+  "C303": { "W0": "純粹白" },
+  "C304": { "W0": "純粹白" },
+  "C503": { "W0": "純粹白" },
+  "C605": { "B9": "深海藍" },
+  "C605A": { "B9": "深海藍" },
+  "C709": { "A3": "珊瑚粉", "B7": "寶石藍", "B9": "深海藍", "C7": "葡萄紫", "F7": "暗棗紅" },
+  "C7091": { "B7": "寶石藍", "B9": "深海藍" },
+  "C713": { "C6": "亮紫紅", "E5": "抹茶綠", "F5": "豆沙紅" },
+  "C714": { "A3": "珊瑚粉", "B9": "深海藍", "C0": "丁香紫" },
+  "C805N1": { "A0": "寶寶粉", "B0": "寶寶藍" },
+
+  "D303": { "W0": "純粹白" },
+  "D305": { "W0": "純粹白" },
+  "D503": { "W0": "純粹白" },
+
+  "F603": { "A0": "寶寶粉", "B0": "寶寶藍", "C0": "丁香紫", "E0": "果子綠" },
+  "F6041": { "A0": "寶寶粉", "B0": "寶寶藍", "E0": "果子綠" },
+  "F605": { "A0": "寶寶粉", "C0": "丁香紫", "E0": "果子綠" },
+  "F605A": { "A0": "寶寶粉", "C0": "丁香紫", "E0": "果子綠" },
+  "F608": { "A0": "寶寶粉" },
+  "F609": { "A0": "寶寶粉", "B0": "寶寶藍", "C0": "丁香紫", "E0": "果子綠" },
+  "F611": { "B0": "寶寶藍", "C0": "丁香紫", "E0": "果子綠" },
+
+  "I245": { "A0": "寶寶粉", "B0": "寶寶藍" },
+  "I704": { "A0": "寶寶粉", "B0": "寶寶藍" },
+  "I712": { "A0": "寶寶粉", "B0": "寶寶藍" },
+
+  "W403": { "A0": "寶寶粉", "A6": "亮桃紅", "B0": "寶寶藍", "B9": "深海藍", "C7": "葡萄紫" },
+  "W4031": { "B9": "深海藍" },
+  "W460": { "A1": "活潑粉", "B9": "深海藍", "C7": "葡萄紫" }
+};
+
+</script>
+<script>
+document.addEventListener("change", function(e) {
+
+  if (e.target.classList.contains("s_product-code")) {
+
+    const productSelect = e.target;
+    const selectedCode = productSelect.value;
+
+    // 找同一列的顏色 select
+    const colorSelect = productSelect.closest("tr").querySelector(".s_color");
+
+    // 清空舊顏色
+    colorSelect.innerHTML = '<option value="">請選擇</option>';
+
+    // 依貨號加入顏色 (物件格式)
+    if (colorMap[selectedCode]) {
+      for (const code in colorMap[selectedCode]) {
+        const opt = document.createElement("option");
+        opt.value = code + colorMap[selectedCode][code]; // value 可用代碼+中文
+        opt.textContent = `${code} ${colorMap[selectedCode][code]}`; // 顯示「代碼 中文名稱」
+        colorSelect.appendChild(opt);
+      }
+    }
+  }
+
+});
+</script>
 		<td>
 			<select id="product-code" name="product_code[]" class="s_product-code" style="width:100px">
 				<option value="">請選擇</option>
@@ -193,39 +309,8 @@
 </script>
 
 		<td>
-		  <select class="s_color" name="s_color[]">
+		  <select class="s_color" name="s_color[]" style="width:100px">
 			<option value="">請選擇</option>
-			<option value="A0寶寶粉">A0 寶寶粉</option>
-			<option value="A1活潑粉">A1 活潑粉</option>
-			<option value="A2梅子粉">A2 梅子粉</option>
-			<option value="A3珊瑚粉">A3 珊瑚粉</option>
-			<option value="A6亮桃紅">A6 亮桃紅</option>
-			<option value="A9釀酒紅">A9 釀酒紅</option>
-			<option value="B0寶寶藍">B0 寶寶藍</option>
-			<option value="B5北歐藍">B5 北歐藍</option>
-			<option value="B7蔚海藍">B7 蔚海藍</option>
-			<option value="B7寶石藍">B7 寶石藍</option>
-			<option value="B9深海藍">B9 深海藍</option>
-			<option value="C0丁香紫">C0 丁香紫</option>
-			<option value="C2迷霧紫">C2 迷霧紫</option>
-			<option value="C6亮紫紅">C6 亮紫紅</option>
-			<option value="C7葡萄紫">C7 葡萄紫</option>
-			<option value="D0天堂藍">D0 天堂藍</option>
-			<option value="E0果子綠">E0 果子綠</option>
-			<option value="E2雪松綠">E2 雪松綠</option>
-			<option value="E5抹茶綠">E5 抹茶綠</option>
-			<option value="F0粉霧橘">F0 粉霧橘</option>
-			<option value="F1卡其灰">F1 卡其灰</option>
-			<option value="F1杏仁奶">F1 杏仁奶</option>
-			<option value="F5豆沙紅">F5 豆沙紅</option>
-			<option value="F7暗棗紅">F7 暗棗紅</option>
-			<option value="F8礦物棕">F8 礦物棕</option>
-			<option value="W0純粹白">W0 純粹白</option>
-			<option value="W3蓋亞灰">W3 蓋亞灰</option>
-			<option value="W6灰蒼藍">W6 灰蒼藍</option>
-			<option value="W7暗岩灰">W7 暗岩灰</option>
-			<option value="W8夜幕黑">W8 夜幕黑</option>
-			<option value="W9石墨黑">W9 石墨黑</option>
 		  </select>
 		</td>
         <td> <select class="s_sleeve" name="s_sleeve[]"> <!-- 袖長 -->
@@ -423,11 +508,14 @@
     background:rgba(0,0,0,0.5); 
     justify-content:center; align-items:center;">
 
-  <div style="background:#fff; padding:20px; border-radius:10px; text-align:center; width:300px;">
-    <p>確定輸入都正確並準備開始估價存檔嗎?</p>
-    <button id="okBtn">確定</button>
-    <button id="cancelBtn">取消</button>
-  </div>
+	<div style="background:#fff; padding:20px; border-radius:10px; text-align:center; width:300px;">
+	  <p>確定輸入都正確並準備開始估價存檔嗎?</p>
+	  <p style="color:black; font-weight:bold;">
+	    !!請記得<span style="color:red; font-size:18px;">複製電繡單號</span>到<span style="color:red; font-size:18px;">訂單備註欄</span> !!
+	  </p>
+	  <button id="okBtn">確定</button>
+	  <button id="cancelBtn">取消</button>
+	</div>
 </div>
 
 <style>
@@ -579,6 +667,7 @@ function final_cal() {
 		   //alert("中文數量:"+obj2.chinese+" ,其餘字數量:"+obj2.other+" ,空白字數量:"+obj2.space+" ,單價:"+obj2.price+" ,目前總價:"+total_price);
 		}
 	});
+
 	
 	if (total_price == 0) {
 	    alert("欄位填寫有誤, 請重新確認");
@@ -786,6 +875,12 @@ function myConfirm(callback) {
 // 表單送出
 document.getElementById("orderForm").addEventListener("submit", function(e) {
     e.preventDefault();
+	
+	// 檢查所有欄位不得為空	
+	/*if (table_item == "" || table_color == "" || parseInt(table_number) <= 0 || table_position == "" || table_font == "" || table_fontcolor == "") {
+	   alert("所有欄位皆為必填, 請重新確認");
+	   return;
+    }*/
 
     final_cal();
 	$(".price").css("display", "block");
