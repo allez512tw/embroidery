@@ -314,7 +314,7 @@ document.addEventListener("change", function(e) {
 		  </select>
 		</td>
         <td> <select class="s_sleeve" name="s_sleeve[]"> <!-- 袖長 -->
-			    <option>請選擇</option>
+			    <option value="">請選擇</option>
 				<option value="short">短袖</option>
 				<option value="long">長袖</option>
 				<option value="three_quarter">七分袖</option>
@@ -340,7 +340,7 @@ document.addEventListener("change", function(e) {
 		</td>
 		<td> <input name="i_number[]" placeholder="" size="10" /></td> <!-- 件數 -->
 		<td> <select class="s_position" name="s_position[]"> <!-- 電繡位置 -->
-			    <option>請選擇</option>
+			    <option value="">請選擇</option>
 				<option value="left_chest">左胸口處</option>
 				<option value="right_chest">右胸口處</option>
 				<option value="above_left_pocket">左胸口袋上方</option>
@@ -348,7 +348,7 @@ document.addEventListener("change", function(e) {
 		     </select>
 		</td>
 		<td> <select class="s_font" name="s_font[]"> <!-- 電繡字體 -->
-			    <option>請選擇</option>
+			    <option value="">請選擇</option>
 				<option value="ch_kai">中文-標楷體</option>
 				<option value="ch_heavy">中文-華康中黑體</option>
 				<option value="en_kai">英文-標楷體</option>
@@ -358,7 +358,7 @@ document.addEventListener("change", function(e) {
 		     </select>
 		</td>
 		<td> <select class="s_embroidery_color" name="s_embroidery_color[]"> <!-- 電繡顏色 -->
-			    <option>請選擇</option>
+			    <option value="">請選擇</option>
 				<option value="700_apple_red">700 蘋果紅</option>
 				<option value="535_orange_red">535 橘紅色</option>
 				<option value="525_golden_yellow">525 金黃色</option>
@@ -619,113 +619,82 @@ function sum_money(myfield) {
 }
 
 function final_cal() {
-    //reset
-	$('#final_id').text("");
-	$('#copyButton').css("display", "none");
-	$('#final_price').text("");
-	$(".price").css("display", "none");
-	final_id = "";
-	total_price = 0;
-	chinese_num = 0;
-	english_num = 0;
-	chinese_price = 0;
-	english_price = 0;
+    // Reset variables and UI elements
+    $('#final_id').text("");
+    $('#copyButton').css("display", "none");
+    $('#final_price').text("");
+    $(".price").css("display", "none");
+    final_id = "";
+    total_price = 0;
+    chinese_num = 0;
+    english_num = 0;
+    chinese_price = 0;
+    english_price = 0;
 
-	var table_v = "";
-	var obj1;
-	var obj2;
-	
-	
-//每件繡不一樣
-	table_v = "table2"
+    var isValid = true;
+    var errorMessage = "";
 
-	$("."+table_v+" tr").each(function(i){
-		if (i != 0) {
-		   var myfield1 = $(this).find('td:eq(9)').find("input").val()
-		   //alert("第"+(i+1)+"行td的值："+myfield1+"。");
+    // Each row of the table will be checked
+    $("." + "table2" + " tr").each(function(i) {
+        if (i !== 0) { // Skip the header row
+            var myfield1 = $(this).find('td:eq(9)').find("input").val().trim(); // First embroidery input
+            var myfield2 = $(this).find('td:eq(10)').find("input").val().trim(); // Second embroidery input
+            var col_number = $(this).find('td:eq(5)').find("input").val().trim(); // Number input
+            var product_code = $(this).find(".s_product-code").val(); // Product code dropdown
+            var color = $(this).find(".s_color").val(); // Color dropdown
+            var sleeve = $(this).find(".s_sleeve").val(); // Sleeve dropdown
+            var size = $(this).find(".s_size").val(); // Size dropdown
+            var position = $(this).find(".s_position").val(); // Embroidery position dropdown
+            var font = $(this).find(".s_font").val(); // Font dropdown
+            var embroidery_color = $(this).find(".s_embroidery_color").val(); // Embroidery color dropdown
 
-		   var myfield2 = $(this).find('td:eq(10)').find("input").val()
-		   //alert("第"+(i+1)+"行td的值："+myfield2+"。");
-   
-		   var col_number = $(this).find('td:eq(5)').find("input").val();
-		   
-		   if (col_number > 0) {
-			   obj1 = sum_money(myfield1);
-			   obj2 = sum_money(myfield2);				   
-			   total_price += (parseInt(obj1.price) * parseInt(col_number));
-			   total_price += (parseInt(obj2.price) * parseInt(col_number));
-			   chinese_num += (parseInt(obj1.chinese) * parseInt(col_number));
-			   chinese_num += (parseInt(obj2.chinese) * parseInt(col_number));
-			   english_num += (parseInt(obj1.other) * parseInt(col_number));
-			   english_num += (parseInt(obj2.other) * parseInt(col_number));
-			   chinese_price += (parseInt(obj1.price_ch) * parseInt(col_number));
-			   chinese_price += (parseInt(obj2.price_ch) * parseInt(col_number));
-			   english_price += (parseInt(obj1.price_en) * parseInt(col_number));
-			   english_price += (parseInt(obj2.price_en) * parseInt(col_number));
-		   }
-		   //alert("中文數量:"+obj1.chinese+" ,其餘字數量:"+obj1.other+" ,空白字數量:"+obj1.space+" ,單價:"+obj1.price+" ,目前總價:"+total_price);
-		   //alert("中文數量:"+obj2.chinese+" ,其餘字數量:"+obj2.other+" ,空白字數量:"+obj2.space+" ,單價:"+obj2.price+" ,目前總價:"+total_price);
-		}
-	});
-
-	
-	if (total_price == 0) {
-	    alert("欄位填寫有誤, 請重新確認");
-	    return;
-	}
-	/* //debug table
-    $("."+table_v+" tr").each(function(i){
-       $(this).children('td').each(function(j){
-	       if (j == 0) {
-		       alert("第"+(i+1)+"行，第"+(j+1)+"个td的值："+$(this).text()+"。");
-		   } else {
-		       alert("第"+(i+1)+"行，第"+(j+1)+"个td的值："+$(this).find("input").val()+"。");
-		   }
-       });
+            // Check for empty or default values
+            if (!product_code || 
+                !color || 
+                !sleeve || 
+                !size || 
+                !position || 
+                !font || 
+                !embroidery_color || 
+                !col_number || 
+                parseInt(col_number) <= 0 || 
+                (myfield1.length === 0 && myfield2.length === 0)) {
+                isValid = false;
+                errorMessage = "欄位填寫有誤,請重新確認。"; // Custom error message
+                return false; // Break out of the each loop
+            }
+        }
     });
-	*/
-	/*
-	var json_arr = [];
-	
-	$("."+table_v+" tr").each(function(i){
-		if (i != 0) {
-		   var table_id = $(this).find('td:eq(0)').text(); //序號
-		   var table_item = $(this).find('td:eq(1)').find("select option:selected").text(); //貨號
-		   var table_color = $(this).find('td:eq(2)').find("select option:selected").text() //顏色
-		   var table_sleeve = $(this).find('td:eq(3)').find("select option:selected").text() //袖長
-		   var table_size = $(this).find('td:eq(4)').find("select option:selected").text() //尺寸
-		   var table_number = $(this).find('td:eq(5)').find("input").val() //件數
-		   var table_position = $(this).find('td:eq(6)').find("select option:selected").text() //電繡位置
-		   var table_font = $(this).find('td:eq(7)').find("select option:selected").text() //電繡字體
-		   var table_fontcolor = $(this).find('td:eq(8)').find("select option:selected").text() //電繡顏色
-		   var table_content1 = $(this).find('td:eq(9)').find("input").val() //電繡內容(第一行)
-		   var table_content2 = $(this).find('td:eq(10)').find("input").val() //電繡內容(第二行)
 
-		   if (table_item == "" || table_color == "" || parseInt(table_number) <= 0 || table_position == "" || table_font == "" || table_fontcolor == "") {
-			   alert("欄位填寫有誤, 請重新確認");
-			   return;
-		   }
+    if (!isValid) {
+        alert(errorMessage);
+        return; // Exit if validation fails
+    }
 
-		   json_arr.push({"id": table_id, "item":table_item, "color":table_color, "sleeve":table_sleeve, "size":table_size, "number":table_number, "position":table_position, "font":table_font, "font":table_fontcolor, "content1":table_content1, "content2":table_content2, "price":total_price})
-		   alert(
-			  "id: " + table_id +
-			  "\nitem: " + table_item +
-			  "\ncolor: " + table_color +
-			  "\nsleeve: " + table_sleeve +
-			  "\nsize: " + table_size +
-			  "\nnumber: " + table_number +
-			  "\nposition: " + table_position +
-			  "\nfont: " + table_font +
-			  "\nfontcolor: " + table_fontcolor +
-			  "\ncontent1: " + table_content1 +
-			  "\ncontent2: " + table_content2 +
-			  "\nprice: " + total_price
-            );
-		}
-	});
-	return json_arr;
-	*/
-	return;
+    // Continue with calculations if valid
+    $("." + "table2" + " tr").each(function(i) {
+        if (i !== 0) { // Skip the header row
+            var myfield1 = $(this).find('td:eq(9)').find("input").val();
+            var myfield2 = $(this).find('td:eq(10)').find("input").val();
+            var col_number = $(this).find('td:eq(5)').find("input").val();
+
+            var obj1 = sum_money(myfield1);
+            var obj2 = sum_money(myfield2);
+            total_price += (parseInt(obj1.price) * parseInt(col_number));
+            total_price += (parseInt(obj2.price) * parseInt(col_number));
+            chinese_num += (parseInt(obj1.chinese) * parseInt(col_number));
+            chinese_num += (parseInt(obj2.chinese) * parseInt(col_number));
+            english_num += (parseInt(obj1.other) * parseInt(col_number));
+            english_num += (parseInt(obj2.other) * parseInt(col_number));
+            chinese_price += (parseInt(obj1.price_ch) * parseInt(col_number));
+            chinese_price += (parseInt(obj2.price_ch) * parseInt(col_number));
+            english_price += (parseInt(obj1.price_en) * parseInt(col_number));
+            english_price += (parseInt(obj2.price_en) * parseInt(col_number));
+        }
+    });
+
+    // Display final price
+    $('#final_price').text("總金額: " + total_price + "元");
 }
 /*
 $('#save').click(function(){
