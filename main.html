@@ -649,6 +649,15 @@ function final_cal() {
             var embroidery_color = $(this).find(".s_embroidery_color").val(); // Embroidery color dropdown
 
             // Check for empty or default values
+			if (!product_code)
+			{
+				errorMessage = "商品貨號有缺漏,請確認。"; // Custom error message
+			}
+			if (!color)
+			{
+				errorMessage = "顏色有缺漏,請確認。"; // Custom error message
+			}
+			
             if (!product_code || 
                 !color || 
                 !sleeve || 
@@ -951,6 +960,7 @@ document.getElementById("copyButton").addEventListener("click", function () {
 </script>
 
 </html>
+
 
 
 
