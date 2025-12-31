@@ -633,6 +633,7 @@ function final_cal() {
 
     var isValid = true;
     var errorMessage = "";
+	let errorMessages = [];
 
     // Each row of the table will be checked
     $("." + "table2" + " tr").each(function(i) {
@@ -651,14 +652,47 @@ function final_cal() {
             // Check for empty or default values
 			if (!product_code)
 			{
-				errorMessage = "商品貨號有缺漏,請確認。"; // Custom error message
+				errorMessages.push("[商品貨號] ");
 			}
 			if (!color)
 			{
-				errorMessage = "顏色有缺漏,請確認。"; // Custom error message
+				errorMessages.push("[顏色] ");
+			}
+			if (!sleeve)
+			{
+				errorMessages.push("[袖長] ");
+			}
+			if (!size)
+			{
+				errorMessages.push("[尺寸] ");
+			}
+			if (!col_number || parseInt(col_number) <= 0)
+			{
+				errorMessages.push("[件數] ");
+			}
+			if (!position)
+			{
+				errorMessages.push("[電繡位置] ");
+			}
+			if (!font)
+			{
+				errorMessages.push("[電繡字體] ");
+			}
+			if (!embroidery_color)
+			{
+				errorMessages.push("[電繡顏色] ");
+			}
+			if (myfield1.length === 0)
+			{
+				errorMessages.push("[電繡內容(第一行)] ");
+			}
+			if (errorMessages.length > 0) {
+				errorMessages.push("\n!! 以上欄位資料不完整，請重新確認 !!");
+				alert(errorMessages.join("\n"));
+				return false; // 若是在送單前檢查，可中斷流程
 			}
 			
-            if (!product_code || 
+            /*if (!product_code || 
                 !color || 
                 !sleeve || 
                 !size || 
@@ -671,7 +705,7 @@ function final_cal() {
                 isValid = false;
                 errorMessage = "欄位填寫有誤,請重新確認。"; // Custom error message
                 return false; // Break out of the each loop
-            }
+            }*/
         }
     });
 
@@ -960,7 +994,6 @@ document.getElementById("copyButton").addEventListener("click", function () {
 </script>
 
 </html>
-
 
 
 
