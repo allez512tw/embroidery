@@ -634,6 +634,14 @@ function final_cal() {
     var isValid = true;
     var errorMessage = "";
 	let errorMessages = [];
+	
+    // 檢查聯絡方式
+    var company = $('#input_company').val().trim();
+    var name    = $('#input_name').val().trim();
+    var phone   = $('#input_phone').val().trim();
+    var email   = $('#input_email').val().trim();
+
+	
 
     // Each row of the table will be checked
     $("." + "table2" + " tr").each(function(i) {
@@ -686,34 +694,30 @@ function final_cal() {
 			{
 				errorMessages.push("[電繡內容(第一行)] ");
 			}
-			if (errorMessages.length > 0) {
-				errorMessages.push("\n!! 以上欄位資料不完整，請重新確認 !!");
-				alert(errorMessages.join("\n"));
-				return false; // 若是在送單前檢查，可中斷流程
+			if (!company)
+			{
+				errorMessages.push("[單位名稱] ");
 			}
-			
-            /*if (!product_code || 
-                !color || 
-                !sleeve || 
-                !size || 
-                !position || 
-                !font || 
-                !embroidery_color || 
-                !col_number || 
-                parseInt(col_number) <= 0 || 
-                (myfield1.length === 0 && myfield2.length === 0)) {
-                isValid = false;
-                errorMessage = "欄位填寫有誤,請重新確認。"; // Custom error message
-                return false; // Break out of the each loop
-            }*/
+			if (!name)
+			{
+				errorMessages.push("[聯絡人姓名] ");
+			}			
+			if (!phone)
+			{
+				errorMessages.push("[電話] ");
+			}			
+			if (!email)
+			{
+				errorMessages.push("[e-mail] ");
+			}
         }
     });
 
-    if (!isValid) {
-        alert(errorMessage);
-        return; // Exit if validation fails
-    }
-
+	if (errorMessages.length > 0) {
+		errorMessages.push("\n!! 以上欄位資料不完整，請重新確認 !!");
+		alert(errorMessages.join("\n"));
+		return false; // 若是在送單前檢查，可中斷流程
+	}
     // Continue with calculations if valid
     $("." + "table2" + " tr").each(function(i) {
         if (i !== 0) { // Skip the header row
@@ -738,6 +742,7 @@ function final_cal() {
 
     // Display final price
     $('#final_price').text("總金額: " + total_price + "元");
+	return true;
 }
 /*
 $('#save').click(function(){
@@ -893,90 +898,93 @@ document.getElementById("orderForm").addEventListener("submit", function(e) {
 	   alert("所有欄位皆為必填, 請重新確認");
 	   return;
     }*/
+	
+	if (final_cal()) {
+		$(".price").css("display", "block");
+		// 更新到網頁上的 #final_price
+		$('#final_price').html(
+		  "中文共 " + chinese_num + " 字，共 $" + chinese_price + " ，" +
+		  "英文、數字、符號共 " + english_num + " 字，共 $" + english_price + "<br>" +
+		  "總價 <b style='color:red;'>$" + total_price + "</b> ，<b>請下單 <span style='color:red;'>" + (total_price/15) + "</span> 個單位</b>"
+		);
 
-    final_cal();
-	$(".price").css("display", "block");
-	// 更新到網頁上的 #final_price
-	$('#final_price').html(
-	  "中文共 " + chinese_num + " 字，共 $" + chinese_price + " ，" +
-	  "英文、數字、符號共 " + english_num + " 字，共 $" + english_price + "<br>" +
-	  "總價 <b style='color:red;'>$" + total_price + "</b> ，<b>請下單 <span style='color:red;'>" + (total_price/15) + "</span> 個單位</b>"
-	);
+		// 確認送出
+		myConfirm(function(result){
+			if(result) {
+				// 🔒 禁用按鈕 10 秒
+				const submitButton = document.getElementById("save");
+				submitButton.disabled = true;
+				submitButton.textContent = "冷卻10秒中"; // 可選，改變按鈕文字
 
-    // 確認送出
-    myConfirm(function(result){
-		if(result) {
-			// 🔒 禁用按鈕 10 秒
-			const submitButton = document.getElementById("save");
-			submitButton.disabled = true;
-			submitButton.textContent = "冷卻10秒中"; // 可選，改變按鈕文字
-
-			setTimeout(() => {
-				submitButton.disabled = false;
-				submitButton.textContent = "估價並送單"; // 恢復原本的按鈕文字
-			}, 10000); // 10 秒 = 10000 毫秒
+				setTimeout(() => {
+					submitButton.disabled = false;
+					submitButton.textContent = "估價並送單"; // 恢復原本的按鈕文字
+				}, 10000); // 10 秒 = 10000 毫秒
 
 
-			// 找到原始表格
-			const originalTable = document.querySelector(".table2");
+				// 找到原始表格
+				const originalTable = document.querySelector(".table2");
 
-			// 複製一份（不影響畫面上的表格）
-			const clonedTable = originalTable.cloneNode(true);
+				// 複製一份（不影響畫面上的表格）
+				const clonedTable = originalTable.cloneNode(true);
 
-			// 👇 解決 select/input 值沒跟著複製的問題
-			syncInputValues(originalTable, clonedTable);
+				// 👇 解決 select/input 值沒跟著複製的問題
+				syncInputValues(originalTable, clonedTable);
 
-			// 對 clone 做靜態化處理
-			prepareTableForEmail(clonedTable);
-			styleTableForEmail(clonedTable);
+				// 對 clone 做靜態化處理
+				prepareTableForEmail(clonedTable);
+				styleTableForEmail(clonedTable);
 
-			// 🔁 把使用者填入的資料轉為靜態文字
-			//prepareTableForEmail(".table2");
-			//styleTableForEmail(".table2");     // 把表格加上格線 & 樣式
+				// 🔁 把使用者填入的資料轉為靜態文字
+				//prepareTableForEmail(".table2");
+				//styleTableForEmail(".table2");     // 把表格加上格線 & 樣式
 
-			// 取得靜態表格 HTML
-			document.getElementById("table_content").value = clonedTable.outerHTML;
+				// 取得靜態表格 HTML
+				document.getElementById("table_content").value = clonedTable.outerHTML;
 
-			// 取得使用者輸入的資料
-			const company = document.getElementById("input_company").value;
-			const name = document.getElementById("input_name").value;
-			const phone = document.getElementById("input_phone").value;
-			const email = document.getElementById("input_email").value;
-			const ordernumber = document.getElementById("input_ordernumber").value;
+				// 取得使用者輸入的資料
+				const company = document.getElementById("input_company").value;
+				const name = document.getElementById("input_name").value;
+				const phone = document.getElementById("input_phone").value;
+				const email = document.getElementById("input_email").value;
+				const ordernumber = document.getElementById("input_ordernumber").value;
 
-			// 設定到對應的 hidden 欄位
-			document.getElementById("user_company").value = company;
-			document.getElementById("user_name").value = name;
-			document.getElementById("user_phone").value = phone;
-			document.getElementById("user_email").value = email;
-			document.getElementById("user_ordernumber").value = ordernumber;
-			document.getElementById("user_memory").value = total_price;
+				// 設定到對應的 hidden 欄位
+				document.getElementById("user_company").value = company;
+				document.getElementById("user_name").value = name;
+				document.getElementById("user_phone").value = phone;
+				document.getElementById("user_email").value = email;
+				document.getElementById("user_ordernumber").value = ordernumber;
+				document.getElementById("user_memory").value = total_price;
 
-			const serialNumber = generateSerialNumber();
-			document.getElementById("user_serialnumber").value = serialNumber;
+				const serialNumber = generateSerialNumber();
+				document.getElementById("user_serialnumber").value = serialNumber;
 
-            const constform = document.getElementById("orderForm");
-			// 確認送出
-			emailjs.sendForm('service_cou7ucc', 'template_ac4gzdw', constform)
-			  .then(function (response) {
+				const constform = document.getElementById("orderForm");
+				// 確認送出
+				emailjs.sendForm('service_cou7ucc', 'template_ac4gzdw', constform)
+				  .then(function (response) {
 
-				document.getElementById("display_serialnumber").textContent = "您的電繡單單號是: " + serialNumber;
-				
-				// 顯示 copy 按鈕
-				const copyBtn = document.getElementById("copyButton");
-				copyBtn.style.display = "inline-block";
+					document.getElementById("display_serialnumber").textContent = "您的電繡單單號是: " + serialNumber;
+					
+					// 顯示 copy 按鈕
+					const copyBtn = document.getElementById("copyButton");
+					copyBtn.style.display = "inline-block";
 
-				// 儲存電繡單單號到按鈕屬性（供複製用）
-				copyBtn.setAttribute("data-serial", serialNumber);
-				
-				alert('✅ 已成功送出信件！');
-				console.log('成功', response);
-			  }, function (error) {
-				alert('❌ 發送失敗：' + JSON.stringify(error));
-				console.error('錯誤', error);
-			  });
-		}
-    });
+					// 儲存電繡單單號到按鈕屬性（供複製用）
+					copyBtn.setAttribute("data-serial", serialNumber);
+					
+					alert('✅ 已成功送出信件！');
+					console.log('成功', response);
+				  }, function (error) {
+					alert('❌ 發送失敗：' + JSON.stringify(error));
+					console.error('錯誤', error);
+				  });
+			}
+		});
+	} else {
+		console.log("資料不完整");
+	}
 });
 
 // 綁定複製按鈕的行為
