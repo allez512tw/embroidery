@@ -92,9 +92,10 @@
         <th>尺寸</th>
         <th>件數</th>
 		<th>電繡位置</th>
-		<th>電繡字體</th>
+		<th>電繡字體(第一行)</th>
 		<th>電繡顏色</th>
 		<th>電繡內容(第一行)</th>
+		<th>電繡字體(第二行)</th>
 		<th>電繡內容(第二行)</th>
     </tr>
     </thead>
@@ -376,6 +377,16 @@ document.addEventListener("change", function(e) {
 		<!-- 電繡內容1 maxlength字數限制-->
 
 			<td><input id="embroidery1" name="i_embroidery1[]" placeholder="字數限制，超過自動刪除"/></td>
+			<td> <select class="s_font2" name="s_font2[]"> <!-- 電繡字體(第二行) -->
+			    <option value="">請選擇</option>
+				<option value="ch_kai">中文-標楷體</option>
+				<option value="ch_heavy">中文-華康中黑體</option>
+				<option value="en_kai">英文-標楷體</option>
+				<option value="en_arial">英文-Arial</option>
+				<option value="en_brush_script_mt">英文-Brush Script MT</option>
+				<option value="en_kunstler_script">英文-Kunstler Script</option>
+		     </select>
+		    </td>
 			<td><input id="embroidery2" name="i_embroidery2[]" placeholder="字數限制，超過自動刪除"/></td>
 
 			<script>
@@ -559,6 +570,7 @@ function fun_same(ta, col, v) {
 		"s_size",
         "s_position",
         "s_font",
+        "s_font2",
         "s_embroidery_color"
     ];
 
@@ -646,8 +658,8 @@ function final_cal() {
     // Each row of the table will be checked
     $("." + "table2" + " tr").each(function(i) {
         if (i !== 0) { // Skip the header row
-            var myfield1 = $(this).find('td:eq(9)').find("input").val().trim(); // First embroidery input
-            var myfield2 = $(this).find('td:eq(10)').find("input").val().trim(); // Second embroidery input
+            var myfield1 = $(this).find('td:eq(9)').find("input").val() || "";
+            var myfield2 = $(this).find('td:eq(11)').find("input").val() || "";
             var col_number = $(this).find('td:eq(5)').find("input").val().trim(); // Number input
             var product_code = $(this).find(".s_product-code").val(); // Product code dropdown
             var color = $(this).find(".s_color").val(); // Color dropdown
@@ -686,6 +698,11 @@ function final_cal() {
 			{
 				errorMessages.push("[電繡字體] ");
 			}
+            var font2 = $(this).find(".s_font2").val(); // Get value of the new font2 dropdown
+            if (!font2)
+			{
+				errorMessages.push("[電繡字體(第二行)] ");
+			}
 			if (!embroidery_color)
 			{
 				errorMessages.push("[電繡顏色] ");
@@ -721,8 +738,8 @@ function final_cal() {
     // Continue with calculations if valid
     $("." + "table2" + " tr").each(function(i) {
         if (i !== 0) { // Skip the header row
-            var myfield1 = $(this).find('td:eq(9)').find("input").val();
-            var myfield2 = $(this).find('td:eq(10)').find("input").val();
+            var myfield1 = $(this).find('td:eq(9)').find("input").val() || "";
+            var myfield2 = $(this).find('td:eq(11)').find("input").val() || "";
             var col_number = $(this).find('td:eq(5)').find("input").val();
 
             var obj1 = sum_money(myfield1);
