@@ -394,59 +394,46 @@ document.addEventListener("change", function(e) {
 			<td><input id="embroidery2" name="i_embroidery2[]" placeholder="限中文6字/英文20字"/></td>
 
 			<script>
-			  const maxLength_ch = 13; // 自訂限制 (中文6字+1空白)
-			  const maxLength_en = 20; // 自訂限制 (英數符號空白20字)
-			  let maxLength = 0;
-			  let has_chinese = 0;
+			  const maxLength_ch = 13; // 中文模式（全形）限制
+			  const maxLength_en = 20; // 英文模式（半形）限制
 
 			  function getLength(str) {
 				let len = 0;
 				for (let char of str) {
 				  if (char.charCodeAt(0) > 255) {
-					len += 2;   // 中文、全形
+					len += 2;   // 中文 / 全形
 				  } else {
-					len += 1; // 英文、半形
+					len += 1;   // 英文 / 半形
 				  }
 				}
 				return len;
 			  }
-			  
-			  function hasChinese(str) {
-				  for (let char of str) {
-					if (char.charCodeAt(0) > 255) {
-					  return true;
-					}
-				  }
-				  return false;
-				}
 
-			  function trimToMax(str) {
-				  if (hasChinese(str))
-				  {
-					maxLength = maxLength_ch;
-				  }
-				  else
-				  {
-					maxLength = maxLength_en;
-				  }
-				  
-					while (getLength(str) > maxLength) {
-					  str = str.slice(0, -1);
-					}
-					return str;
+			  function hasChinese(str) {
+				for (let char of str) {
+				  if (char.charCodeAt(0) > 255) return true;
+				}
+				return false;
 			  }
 
-			  function applyLimit(inputId) {
-				const input = document.getElementById(inputId);
-				input.addEventListener("blur", function () {
-				  input.value = trimToMax(input.value);
+			  function limitInput(input) {
+				input.addEventListener("input", function () {
+				  let value = input.value;
+				  let maxLength = hasChinese(value) ? maxLength_ch : maxLength_en;
+
+				  while (getLength(value) > maxLength) {
+					value = value.slice(0, -1);  // 即時移除最後一個字
+				  }
+
+				  input.value = value;
 				});
 			  }
 
 			  // 套用到兩個欄位
-			  applyLimit("embroidery1");
-			  applyLimit("embroidery2");
+			  limitInput(document.getElementById("embroidery1"));
+			  limitInput(document.getElementById("embroidery2"));
 			</script>
+
 		
     </tr>
     </tbody>
