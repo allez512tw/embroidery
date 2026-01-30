@@ -63,6 +63,7 @@
       】欄位內。
     </li>
     <li>官網訂單付款完成後，愛理即會開始製作。</li>
+    <li><span style="color:black; font-weight:bold;">電繡內容限中文6字或英數符號20字內，超過會自動刪除。</span></li>
   </ol>
   <p style="margin-top:12px; 
          color:red; 
@@ -92,9 +93,14 @@
         <th>尺寸</th>
         <th>件數</th>
 		<th>電繡位置</th>
-		<th>電繡字體(第一行)</th>
 		<th>電繡顏色</th>
-		<th>電繡內容(第一行)</th>
+		<th>電繡字體(第一行)</th>
+		<th>
+		  電繡內容(第一行)<br />
+		  <span style="font-size: 12px; color:#666;">
+			字數超過自動刪除
+		  </span>
+		</th>
 		<th>電繡字體(第二行)</th>
 		<th>電繡內容(第二行)</th>
     </tr>
@@ -344,18 +350,6 @@ document.addEventListener("change", function(e) {
 			    <option value="">請選擇</option>
 				<option value="left_chest">左胸口處</option>
 				<option value="right_chest">右胸口處</option>
-				<option value="above_left_pocket">左胸口袋上方</option>
-				<option value="above_right_pocket">右胸口袋上方</option>
-		     </select>
-		</td>
-		<td> <select class="s_font" name="s_font[]"> <!-- 電繡字體 -->
-			    <option value="">請選擇</option>
-				<option value="ch_kai">中文-標楷體</option>
-				<option value="ch_heavy">中文-華康中黑體</option>
-				<option value="en_kai">英文-標楷體</option>
-				<option value="en_arial">英文-Arial</option>
-				<option value="en_brush_script_mt">英文-Brush Script MT</option>
-				<option value="en_kunstler_script">英文-Kunstler Script</option>
 		     </select>
 		</td>
 		<td> <select class="s_embroidery_color" name="s_embroidery_color[]"> <!-- 電繡顏色 -->
@@ -374,9 +368,19 @@ document.addEventListener("change", function(e) {
 				<option value="483_silver_gray">483 銀灰色</option>
 		     </select>
 		</td>
+		<td> <select class="s_font" name="s_font[]"> <!-- 電繡字體 -->
+			    <option value="">請選擇</option>
+				<option value="ch_kai">中文-標楷體</option>
+				<option value="ch_heavy">中文-華康中黑體</option>
+				<option value="en_kai">英文-標楷體</option>
+				<option value="en_arial">英文-Arial</option>
+				<option value="en_brush_script_mt">英文-Brush Script MT</option>
+				<option value="en_kunstler_script">英文-Kunstler Script</option>
+		     </select>
+		</td>
 		<!-- 電繡內容1 maxlength字數限制-->
 
-			<td><input id="embroidery1" name="i_embroidery1[]" placeholder="字數限制，超過自動刪除"/></td>
+			<td><input id="embroidery1" name="i_embroidery1[]" placeholder="限中文6字/英文20字"/></td>
 			<td> <select class="s_font2" name="s_font2[]"> <!-- 電繡字體(第二行) -->
 			    <option value="">請選擇</option>
 				<option value="ch_kai">中文-標楷體</option>
@@ -387,28 +391,49 @@ document.addEventListener("change", function(e) {
 				<option value="en_kunstler_script">英文-Kunstler Script</option>
 		     </select>
 		    </td>
-			<td><input id="embroidery2" name="i_embroidery2[]" placeholder="字數限制，超過自動刪除"/></td>
+			<td><input id="embroidery2" name="i_embroidery2[]" placeholder="限中文6字/英文20字"/></td>
 
 			<script>
-			  const maxLength = 5; // 自訂限制
+			  const maxLength_ch = 13; // 自訂限制 (中文6字+1空白)
+			  const maxLength_en = 20; // 自訂限制 (英數符號空白20字)
+			  let maxLength = 0;
+			  let has_chinese = 0;
 
 			  function getLength(str) {
 				let len = 0;
 				for (let char of str) {
 				  if (char.charCodeAt(0) > 255) {
-					len += 1;   // 中文、全形
+					len += 2;   // 中文、全形
 				  } else {
-					len += 0.5; // 英文、半形
+					len += 1; // 英文、半形
 				  }
 				}
 				return len;
 			  }
+			  
+			  function hasChinese(str) {
+				  for (let char of str) {
+					if (char.charCodeAt(0) > 255) {
+					  return true;
+					}
+				  }
+				  return false;
+				}
 
 			  function trimToMax(str) {
-				while (getLength(str) > maxLength) {
-				  str = str.slice(0, -1);
-				}
-				return str;
+				  if (hasChinese(str))
+				  {
+					maxLength = maxLength_ch;
+				  }
+				  else
+				  {
+					maxLength = maxLength_en;
+				  }
+				  
+					while (getLength(str) > maxLength) {
+					  str = str.slice(0, -1);
+					}
+					return str;
 			  }
 
 			  function applyLimit(inputId) {
