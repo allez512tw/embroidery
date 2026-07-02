@@ -4,8 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>電繡線上估價單</title>
+    
+    <!-- 預連線以優化 GitHub Pages 載入速度 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://img.shoplineapp.com">
+
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <!-- 使用 defer 確保不阻塞 HTML 渲染 -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 
     <style>
         :root {
@@ -340,13 +349,12 @@
 <body>
 <div class="container">
     <div class="instruction-image-wrapper">
-        <img src="https://img.shoplineapp.com/media/image_clips/69843b90d68e93f4bb6ffc20/original.jpg?1770273680=&owner_id=6296d12d93deb3003127c0e8" alt="電繡流程說明（電腦版）" class="instruction-image desktop-only">
-        <img src="https://img.shoplineapp.com/media/image_clips/698543a3a285bbab87c9193a/original.jpg?1770341282=&owner_id=6296d12d93deb3003127c0e8" alt="電繡流程說明（手機版）" class="instruction-image mobile-only">
+        <img src="https://img.shoplineapp.com/media/image_clips/69843b90d68e93f4bb6ffc20/original.jpg?1770273680=&owner_id=6296d12d93deb3003127c0e8" alt="電繡流程說明（電腦版）" class="instruction-image desktop-only" loading="lazy" decoding="async">
+        <img src="https://img.shoplineapp.com/media/image_clips/698543a3a285bbab87c9193a/original.jpg?1770341282=&owner_id=6296d12d93deb3003127c0e8" alt="電繡流程說明（手機版）" class="instruction-image mobile-only" loading="lazy" decoding="async">
     </div>
 </div>
 
 <div class="container">
-    <!-- 修復點：將 form 移至 container 直屬層級，包裹所有區塊 -->
     <form id="orderForm">
         <div class="section-box" style="margin-top:25px;">
             <strong class="section-header-text">填寫需求及內容</strong>
@@ -361,8 +369,8 @@
                         <div class="preview-area">
                             <div class="preview-box">
                                 <div class="zoom-wrapper">
-                                    <img src="https://img.shoplineapp.com/media/image_clips/6983f9efaa3fc852506c208d/original.jpg?1770256879=&owner_id=6296d12d93deb3003127c0e8" alt="電繡示意圖" class="preview-img default-preview-img">
-                                    <img src="" alt="商品款式預覽" class="preview-img dynamic-preview-img">
+                                    <img src="https://img.shoplineapp.com/media/image_clips/6983f9efaa3fc852506c208d/original.jpg?1770256879=&owner_id=6296d12d93deb3003127c0e8" alt="電繡示意圖" class="preview-img default-preview-img" decoding="async">
+                                    <img src="" alt="商品款式預覽" class="preview-img dynamic-preview-img" decoding="async">
                                     <div class="preview-text-layer">
                                         <span class="p-text-line p-line1"></span>
                                         <span class="p-text-line p-line2"></span>
@@ -475,7 +483,6 @@
             </div>
         </div>
 
-        <!-- 修復點：移除錯誤嵌套的 Container，將區塊平行排列 -->
         <div class="section-box">
             <strong class="section-header-text">聯絡方式</strong>
             <div class="contact-grid">
@@ -532,7 +539,6 @@
 </div>
 
 <script>
-// 實際專案中建議將此數據移至外部檔案
 const PRODUCT_DATA = {
     COLORS: {
         "A148": { "A0": { name: "A0寶寶粉", img: "" }, "W0": { name: "W0純粹白", img: "https://img.shoplineapp.com/media/image_clips/6a44bd324f4a30c119c091d1/original.png?1782889777=&owner_id=6296d12d93deb3003127c0e8" } },
@@ -660,6 +666,7 @@ function fitLayerToContainer(card) {
 }
 
 function initMagnifier(row) {
+    if (!row) return;
     const box = row.querySelector('.preview-box');
     const wrapper = row.querySelector('.zoom-wrapper');
 
@@ -687,6 +694,7 @@ function initMagnifier(row) {
 }
 
 function updateSelectColor(element) {
+    if (!element) return;
     if (!element.value) {
         element.classList.add("gray-text");
     } else {
@@ -704,27 +712,33 @@ function initProductOptions(row = document) {
 }
 
 function updateProductOptions(selectEl) {
+    if (!selectEl) return;
     const code = selectEl.value;
     const card = selectEl.closest('.card-item');
+    if (!card) return;
+    
     const colorSelect = card.querySelector('.s_color');
     const sleeveSelect = card.querySelector('.s_sleeve');
 
-    colorSelect.innerHTML = '<option value="" selected disabled hidden>請選擇</option>';
-    if (PRODUCT_DATA.COLORS[code]) {
-        Object.entries(PRODUCT_DATA.COLORS[code]).forEach(([key, valObj]) => {
-            colorSelect.add(new Option(valObj.name, key));
-        });
+    if (colorSelect) {
+        colorSelect.innerHTML = '<option value="" selected disabled hidden>請選擇</option>';
+        if (PRODUCT_DATA.COLORS[code]) {
+            Object.entries(PRODUCT_DATA.COLORS[code]).forEach(([key, valObj]) => {
+                colorSelect.add(new Option(valObj.name, key));
+            });
+        }
+        updateSelectColor(colorSelect);
     }
 
-    sleeveSelect.innerHTML = '<option value="" selected disabled hidden>請選擇</option>';
-    if (PRODUCT_DATA.SLEEVES[code]) {
-        Object.entries(PRODUCT_DATA.SLEEVES[code]).forEach(([key, val]) => {
-            sleeveSelect.add(new Option(val, key));
-        });
+    if (sleeveSelect) {
+        sleeveSelect.innerHTML = '<option value="" selected disabled hidden>請選擇</option>';
+        if (PRODUCT_DATA.SLEEVES[code]) {
+            Object.entries(PRODUCT_DATA.SLEEVES[code]).forEach(([key, val]) => {
+                sleeveSelect.add(new Option(val, key));
+            });
+        }
+        updateSelectColor(sleeveSelect);
     }
-    
-    updateSelectColor(colorSelect);
-    updateSelectColor(sleeveSelect);
 
     updateProductImage(card);
 }
@@ -732,8 +746,12 @@ function updateProductOptions(selectEl) {
 function updateProductImage(row) {
     if (!row) return;
 
-    const pCode = row.querySelector('.s_product-code').value;
-    const cCode = row.querySelector('.s_color').value;
+    const pCodeEl = row.querySelector('.s_product-code');
+    const cCodeEl = row.querySelector('.s_color');
+    if (!pCodeEl || !cCodeEl) return;
+
+    const pCode = pCodeEl.value;
+    const cCode = cCodeEl.value;
     
     const defaultImg = row.querySelector('.default-preview-img');
     const dynamicImg = row.querySelector('.dynamic-preview-img');
@@ -744,27 +762,32 @@ function updateProductImage(row) {
         imgUrl = PRODUCT_DATA.COLORS[pCode][cCode].img;
     }
 
-    if (imgUrl && imgUrl.trim() !== "") {
-        dynamicImg.src = imgUrl;
-        dynamicImg.style.display = 'block';
-        defaultImg.style.display = 'none';
-    } else {
-        dynamicImg.style.display = 'none';
-        dynamicImg.src = "";
-        defaultImg.style.display = 'block';
+    if (dynamicImg && defaultImg) {
+        if (imgUrl && imgUrl.trim() !== "") {
+            dynamicImg.src = imgUrl;
+            dynamicImg.style.display = 'block';
+            defaultImg.style.display = 'none';
+        } else {
+            dynamicImg.style.display = 'none';
+            dynamicImg.src = "";
+            defaultImg.style.display = 'block';
+        }
     }
 }
 
 function updatePreview(card) {
     if (!card) return;
     
-    const posVal = card.querySelector('.s_position').value;
+    const posEl = card.querySelector('.s_position');
     const layer = card.querySelector('.preview-text-layer');
-    layer.classList.remove('pos-left', 'pos-right');
-    if (posVal === 'left_chest') layer.classList.add('pos-left');
-    if (posVal === 'right_chest') layer.classList.add('pos-right');
+    if (posEl && layer) {
+        const posVal = posEl.value;
+        layer.classList.remove('pos-left', 'pos-right');
+        if (posVal === 'left_chest') layer.classList.add('pos-left');
+        if (posVal === 'right_chest') layer.classList.add('pos-right');
+    }
 
-    const colorVal = card.querySelector('.s_embroidery_color').value;
+    const colorEl = card.querySelector('.s_embroidery_color');
     const pLines = card.querySelectorAll('.p-text-line');
     
     const colorMap = {
@@ -775,8 +798,8 @@ function updatePreview(card) {
 
     let color = '#d1b786';
 
-    if (colorVal) {
-        const prefix = colorVal.split('_')[0];
+    if (colorEl && colorEl.value) {
+        const prefix = colorEl.value.split('_')[0];
         if (colorMap.hasOwnProperty(prefix)) {
             color = colorMap[prefix];
         }
@@ -785,11 +808,13 @@ function updatePreview(card) {
     pLines.forEach(el => el.style.color = color);
 
     ['1', '2'].forEach(idx => {
-        const fontVal = card.querySelector(`.s_font${idx === '1' ? '' : '2'}`).value;
-        const textVal = card.querySelector(`.embroidery${idx}`).value;
+        const fontEl = card.querySelector(`.s_font${idx === '1' ? '' : '2'}`);
+        const textEl = card.querySelector(`.embroidery${idx}`);
         const previewEl = card.querySelector(`.p-line${idx}`);
         
-        if (previewEl) {
+        if (previewEl && fontEl && textEl) {
+            const fontVal = fontEl.value;
+            const textVal = textEl.value;
             previewEl.textContent = textVal;
             previewEl.classList.remove('font-kai', 'font-heavy', 'font-script');
             if (fontVal.includes('kai')) previewEl.classList.add('font-kai');
@@ -798,62 +823,69 @@ function updatePreview(card) {
         }
     });
 
-    const txt2Val = card.querySelector('.embroidery2').value;
-    if (!txt2Val || txt2Val.trim() === '') {
-        layer.classList.add('single-line-mode');
-    } else {
-        layer.classList.remove('single-line-mode');
+    const txt2El = card.querySelector('.embroidery2');
+    if (layer && txt2El) {
+        const txt2Val = txt2El.value;
+        if (!txt2Val || txt2Val.trim() === '') {
+            layer.classList.add('single-line-mode');
+        } else {
+            layer.classList.remove('single-line-mode');
+        }
     }
 
     fitLayerToContainer(card);
 }
 
-// 簡易 Debounce 防止過度寫入
 let saveTimeout;
 function saveToLocalStorage() {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
-        const data = {
-            company: document.getElementById('input_company').value,
-            name: document.getElementById('input_name').value,
-            phone: document.getElementById('input_phone').value,
-            email: document.getElementById('input_email').value,
-            rows: []
-        };
-        
-        document.querySelectorAll('.card-item').forEach(row => {
-            data.rows.push({
-                product_code: row.querySelector('.s_product-code').value,
-                color: row.querySelector('.s_color').value,
-                sleeve: row.querySelector('.s_sleeve').value,
-                size: row.querySelector('.s_size').value,
-                number: row.querySelector('.i_number').value,
-                position: row.querySelector('.s_position').value,
-                emb_color: row.querySelector('.s_embroidery_color').value,
-                font1: row.querySelector('.s_font').value,
-                txt1: row.querySelector('.embroidery1').value,
-                font2: row.querySelector('.s_font2').value,
-                txt2: row.querySelector('.embroidery2').value
+        try {
+            const data = {
+                company: document.getElementById('input_company')?.value || '',
+                name: document.getElementById('input_name')?.value || '',
+                phone: document.getElementById('input_phone')?.value || '',
+                email: document.getElementById('input_email')?.value || '',
+                rows: []
+            };
+            
+            document.querySelectorAll('.card-item').forEach(row => {
+                data.rows.push({
+                    product_code: row.querySelector('.s_product-code')?.value || '',
+                    color: row.querySelector('.s_color')?.value || '',
+                    sleeve: row.querySelector('.s_sleeve')?.value || '',
+                    size: row.querySelector('.s_size')?.value || '',
+                    number: row.querySelector('.i_number')?.value || '1',
+                    position: row.querySelector('.s_position')?.value || '',
+                    emb_color: row.querySelector('.s_embroidery_color')?.value || '',
+                    font1: row.querySelector('.s_font')?.value || '',
+                    txt1: row.querySelector('.embroidery1')?.value || '',
+                    font2: row.querySelector('.s_font2')?.value || '',
+                    txt2: row.querySelector('.embroidery2')?.value || ''
+                });
             });
-        });
-        
-        localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
+            
+            localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
+        } catch (e) {
+            console.warn("LocalStorage 寫入失敗 (可能處於無痕模式下):", e);
+        }
     }, 300);
 }
 
 function loadFromLocalStorage() {
-    const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
-    if (!saved) return;
-    
     try {
+        const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
+        if (!saved) return;
+        
         const data = JSON.parse(saved);
-        if(data.company) document.getElementById('input_company').value = data.company;
-        if(data.name) document.getElementById('input_name').value = data.name;
-        if(data.phone) document.getElementById('input_phone').value = data.phone;
-        if(data.email) document.getElementById('input_email').value = data.email;
+        if(data.company && document.getElementById('input_company')) document.getElementById('input_company').value = data.company;
+        if(data.name && document.getElementById('input_name')) document.getElementById('input_name').value = data.name;
+        if(data.phone && document.getElementById('input_phone')) document.getElementById('input_phone').value = data.phone;
+        if(data.email && document.getElementById('input_email')) document.getElementById('input_email').value = data.email;
 
         if (data.rows && data.rows.length > 0) {
             const container = document.getElementById('cardContainer');
+            if (!container) return;
             while (container.querySelectorAll('.card-item').length < data.rows.length) {
                 addRow();
             }
@@ -887,67 +919,88 @@ function loadFromLocalStorage() {
             });
         }
     } catch (e) {
-        console.error("Auto-fill error:", e);
+        console.warn("LocalStorage 載入失敗:", e);
     }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // 異步安全初始化 EmailJS
     if (typeof emailjs !== 'undefined') {
-        emailjs.init(CONFIG.EMAILJS_KEY);
+        try {
+            emailjs.init(CONFIG.EMAILJS_KEY);
+        } catch(e) {
+            console.error("EmailJS 初始化失敗:", e);
+        }
     } else {
-        console.error("EmailJS failed to load");
-        alert("系統載入異常，請重新整理頁面或稍後再試。");
+        // 嘗試在載入完成後定時重試
+        const checkEmailJS = setInterval(() => {
+            if (typeof emailjs !== 'undefined') {
+                emailjs.init(CONFIG.EMAILJS_KEY);
+                clearInterval(checkEmailJS);
+            }
+        }, 1000);
+        setTimeout(() => clearInterval(checkEmailJS), 10000); // 10秒後停止嘗試
     }
     
     initProductOptions();
     
     document.querySelectorAll('.card-item').forEach(initMagnifier);
 
-    document.getElementById('btnAddRow').addEventListener('click', () => { addRow(); saveToLocalStorage(); });
-    document.getElementById('btnCopyRow').addEventListener('click', () => { copyLastRow(); saveToLocalStorage(); });
-    document.getElementById('btnDelRow').addEventListener('click', () => { delLastRow(); saveToLocalStorage(); });
-    document.getElementById('nosave').addEventListener('click', () => performCalculation(true));
-    document.getElementById('copyButton').addEventListener('click', copySerial);
+    document.getElementById('btnAddRow')?.addEventListener('click', () => { addRow(); saveToLocalStorage(); });
+    document.getElementById('btnCopyRow')?.addEventListener('click', () => { copyLastRow(); saveToLocalStorage(); });
+    document.getElementById('btnDelRow')?.addEventListener('click', () => { delLastRow(); saveToLocalStorage(); });
+    document.getElementById('nosave')?.addEventListener('click', () => performCalculation(true));
+    document.getElementById('copyButton')?.addEventListener('click', copySerial);
     
     const modal = document.getElementById("myConfirm");
     const confirmBtn = document.getElementById("okBtn");
     const cancelBtn = document.getElementById("cancelBtn");
 
-    cancelBtn.addEventListener('click', () => {
-        modal.style.display = "none";
-    });
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            if (modal) modal.style.display = "none";
+        });
+    }
 
-    confirmBtn.addEventListener('click', () => {
-        executeSubmit();
-    });
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+            executeSubmit();
+        });
+    }
 
     const form = document.getElementById('orderForm');
-    form.addEventListener('input', (e) => {
-        if(e.target.matches('input, select')) saveToLocalStorage();
-        if(e.target.matches('.embroidery1, .embroidery2')) updatePreview(e.target.closest('.card-item'));
-    });
-    
-    form.addEventListener('change', (e) => {
-        const row = e.target.closest('.card-item');
-        if (e.target.tagName === 'SELECT') updateSelectColor(e.target);
+    if (form) {
+        form.addEventListener('input', (e) => {
+            if(e.target.matches('input, select')) saveToLocalStorage();
+            if(e.target.matches('.embroidery1, .embroidery2')) {
+                updatePreview(e.target.closest('.card-item'));
+            }
+        });
         
-        if (e.target.classList.contains('s_product-code')) {
-            updateProductOptions(e.target);
-        }
-        
-        if (e.target.classList.contains('s_color')) {
-            updateProductImage(row);
-        }
+        form.addEventListener('change', (e) => {
+            const row = e.target.closest('.card-item');
+            if (e.target.tagName === 'SELECT') updateSelectColor(e.target);
+            
+            if (e.target.classList.contains('s_product-code')) {
+                updateProductOptions(e.target);
+            }
+            
+            if (e.target.classList.contains('s_color')) {
+                updateProductImage(row);
+            }
 
-        if (e.target.matches('.s_position, .s_font, .s_font2, .s_embroidery_color')) updatePreview(row);
-        saveToLocalStorage();
-    });
+            if (e.target.matches('.s_position, .s_font, .s_font2, .s_embroidery_color')) {
+                updatePreview(row);
+            }
+            saveToLocalStorage();
+        });
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (!performCalculation(true)) return;
-        modal.style.display = "flex";
-    });
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!performCalculation(true)) return;
+            if (modal) modal.style.display = "flex";
+        });
+    }
 
     document.querySelectorAll('select').forEach(updateSelectColor);
     loadFromLocalStorage();
@@ -955,7 +1008,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function addRow() {
     const container = document.getElementById('cardContainer');
+    if (!container) return;
     const template = container.querySelector('.td2_row');
+    if (!template) return;
     const newRow = template.cloneNode(true);
     
     initProductOptions(newRow);
@@ -968,9 +1023,11 @@ function addRow() {
     });
     
     const textLayer = newRow.querySelector('.preview-text-layer');
-    textLayer.className = 'preview-text-layer';
-    textLayer.classList.add('single-line-mode');
-    textLayer.style.transform = 'translate(-50%, -50%) scale(1)';
+    if (textLayer) {
+        textLayer.className = 'preview-text-layer';
+        textLayer.classList.add('single-line-mode');
+        textLayer.style.transform = 'translate(-50%, -50%) scale(1)';
+    }
     
     newRow.querySelectorAll('.p-text-line').forEach(el => {
         el.textContent = '';
@@ -981,19 +1038,22 @@ function addRow() {
 
     const defaultImg = newRow.querySelector('.default-preview-img');
     const dynamicImg = newRow.querySelector('.dynamic-preview-img');
-    dynamicImg.src = "";
-    dynamicImg.style.display = "none";
-    defaultImg.style.display = "block";
+    if (dynamicImg && defaultImg) {
+        dynamicImg.src = "";
+        dynamicImg.style.display = "none";
+        defaultImg.style.display = "block";
+    }
     
     initMagnifier(newRow);
-
     container.appendChild(newRow);
     reIndex();
 }
 
 function copyLastRow() {
     const container = document.getElementById('cardContainer');
+    if (!container) return;
     const rows = container.querySelectorAll('.td2_row');
+    if (rows.length === 0) return;
     const lastRow = rows[rows.length - 1];
     const newRow = lastRow.cloneNode(true);
     
@@ -1040,8 +1100,8 @@ function performCalculation(showErrors = true) {
 
     ['input_company', 'input_name', 'input_phone', 'input_email'].forEach(id => {
         const el = document.getElementById(id);
-        if (!el.value.trim()) {
-            errors.push(`${el.previousElementSibling.textContent} 未填寫`);
+        if (el && !el.value.trim()) {
+            errors.push(`${el.previousElementSibling?.textContent || "聯絡欄位"} 未填寫`);
             if (!focusEl) focusEl = el;
         }
     });
@@ -1108,9 +1168,12 @@ function performCalculation(showErrors = true) {
 
     totalPrice = chPrice + enPrice;
     if (showErrors) {
-        document.getElementById('final_price').innerHTML = 
-            `中文共 ${chNum} 字 ($${chPrice})，英數符號共 ${enNum} 字 ($${enPrice})<br>` +
-            `總價 <b style='color:#c62828;'>$${totalPrice}</b>，請下單 <span style='color:#c62828;'>${Math.ceil(totalPrice/15)}</span> 個單位`;
+        const fpEl = document.getElementById('final_price');
+        if (fpEl) {
+            fpEl.innerHTML = 
+                `中文共 ${chNum} 字 ($${chPrice})，英數符號共 ${enNum} 字 ($${enPrice})<br>` +
+                `總價 <b style='color:#c62828;'>$${totalPrice}</b>，請下單 <span style='color:#c62828;'>${Math.ceil(totalPrice/15)}</span> 個單位`;
+        }
     }
     return true;
 }
@@ -1128,7 +1191,7 @@ function generateEmailTableHTML() {
 
     let totalQty = 0;
     document.querySelectorAll('.td2_row').forEach((row, idx) => {
-        const qty = parseInt(row.querySelector('.i_number').value) || 0;
+        const qty = parseInt(row.querySelector('.i_number')?.value || "0") || 0;
         totalQty += qty;
         html += `<tr style="background:${idx%2===0 ? '#f9f9f9':'#fff'}">`;
         html += `<td style="padding:8px; border:1px solid #ccc; text-align:center;">${idx+1}</td>`;
@@ -1140,9 +1203,9 @@ function generateEmailTableHTML() {
         html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_position')}</td>`;
         html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_embroidery_color')}</td>`;
         html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_font')}</td>`;
-        html += `<td style="padding:8px; border:1px solid #ccc; color:#c62828;">${escape(row.querySelector('.embroidery1').value)}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc; color:#c62828;">${escape(row.querySelector('.embroidery1')?.value || '')}</td>`;
         html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_font2')}</td>`;
-        html += `<td style="padding:8px; border:1px solid #ccc; color:#c62828;">${escape(row.querySelector('.embroidery2').value)}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc; color:#c62828;">${escape(row.querySelector('.embroidery2')?.value || '')}</td>`;
         html += `</tr>`;
     });
     html += `</tbody></table>`;
@@ -1152,31 +1215,48 @@ function generateEmailTableHTML() {
 
 function executeSubmit() {
     const modal = document.getElementById("myConfirm");
-    modal.style.display = "none";
+    if (modal) modal.style.display = "none";
     const btn = document.getElementById("save");
+    if (!btn) return;
+
     btn.disabled = true;
     btn.textContent = "傳送中...";
 
     const serial = "AL" + new Date().toISOString().replace(/[-:T.]/g, "").slice(2, 12) + Math.random().toString(36).substr(2, 3).toUpperCase();
     
-    document.getElementById("user_serialnumber" ).value = serial;
-    document.getElementById("table_content").value = generateEmailTableHTML();
+    const usEl = document.getElementById("user_serialnumber");
+    const tcEl = document.getElementById("table_content");
+    if(usEl) usEl.value = serial;
+    if(tcEl) tcEl.value = generateEmailTableHTML();
+
+    if (typeof emailjs === 'undefined') {
+        alert('❌ 系統載入異常，請確認網頁載入完成，或檢查防毒軟體/廣告阻擋器是否阻擋了外部指令。');
+        btn.disabled = false;
+        btn.textContent = "估價並送單";
+        return;
+    }
 
     emailjs.sendForm(CONFIG.SERVICE_ID, CONFIG.TEMPLATE_ID, "#orderForm")
         .then(() => {
-            localStorage.removeItem(CONFIG.STORAGE_KEY);
+            try {
+                localStorage.removeItem(CONFIG.STORAGE_KEY);
+            } catch(e) {}
             alert('✅ 已成功送出！');
             const disp = document.getElementById("display_serialnumber");
-            disp.innerHTML = `您的電繡單單號是: <b>${serial}</b>`;
-            disp.style.display = "block";
-            document.querySelector(".price").style.display = "block";
-            document.getElementById("copyButton").setAttribute("data-serial", serial);
+            if (disp) {
+                disp.innerHTML = `您的電繡單單號是: <b>${serial}</b>`;
+                disp.style.display = "block";
+            }
+            const pDiv = document.querySelector(".price");
+            if (pDiv) pDiv.style.display = "block";
+            const copyBtn = document.getElementById("copyButton");
+            if (copyBtn) copyBtn.setAttribute("data-serial", serial);
             btn.textContent = "已送出";
             setTimeout(() => { btn.disabled = false; btn.textContent = "估價並送單"; }, 5000);
         })
         .catch(err => {
-            console.error(err);
-            alert('❌ 發送失敗，請檢查網路連線或稍後再試。');
+            console.error("發送失敗：", err);
+            alert('❌ 發送失敗，請檢查網路連線、或確認防護軟體未阻擋 EmailJS 請求。');
             btn.disabled = false;
             btn.textContent = "估價並送單";
         });
