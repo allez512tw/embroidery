@@ -1,1039 +1,1200 @@
-
-<html>
-<!-- 引入 jQuery 與 Select2 -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
+<!DOCTYPE html>
+<html lang="zh-Hant">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>電繡估價單</title>
-  <script src="jquery-3.6.3.min.js"></script>
-  
- <style>
-		table {
-			border-collapse: collapse;
-			border: 2px solid black;
-		}
-		td {
-			border: 2px solid black;
-			padding: 10px;
-		}
-		tr {
-			border: 2px solid black;
-			padding: 10px;
-		}
-		th {
-			border: 2px solid black;
-			padding: 10px;
-		}
-</style>		
-  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電繡線上估價單</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #173064;
+            --card-bg: #ffffff;
+            --bg-color: #f4f6f8;
+        }
+
+        body {
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            margin: 0;
+            padding: 20px 0;
+        }
+        
+       .container {
+            width: 94%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        @media (min-width: 1600px) {
+            .container {
+                width: 95%;
+            }
+        }
+
+        .section-box {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .section-header-text {
+            font-size: 30px;
+            display: block;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+            padding-left: 15px;
+        }
+
+        .order-card {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: #fff;
+            position: relative;
+            transition: box-shadow 0.3s;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .card-index {
+            background: var(--primary-color);
+            color: white;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold;
+        }
+
+        .card-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .preview-area {
+            width: 100%;
+        }
+
+  .preview-tip {
+    margin: 18px auto 0;
+    max-width: 460px;
+
+    font-family: "Noto Sans TC", "PingFang TC", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+
+    color: #6e6e73;
+    line-height: 1.8;
+    letter-spacing: .03em;
+
+    text-align: center;
+
+    -webkit-font-smoothing: antialiased;
+}
+
+        .preview-tip span {
+            display: inline;
+        }
+
+        @media (min-width: 1024px) {
+            .preview-tip span {
+                display: block;
+            }
+        }
+
+        .preview-box {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 416.2778 / 437.4444;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: #f9f9f9;
+            cursor: zoom-in;
+        }
+        
+        .zoom-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.1s ease-out;
+            transform-origin: center center;
+            will-change: transform;
+        }
+
+        .preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            inset: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .default-preview-img {
+            z-index: 1;
+        }
+
+        .dynamic-preview-img {
+            z-index: 1;
+            display: none;
+            background-color: #fff;
+        }
+
+        .preview-text-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: max-content;
+            max-width: none;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-text-layer.pos-left { top: 23%; left: 63%; }
+        .preview-text-layer.pos-right { top: 23%; left: 35%; }
+        .preview-text-layer.single-line-mode { top: 25%; }
+
+        .p-text-line {
+            display: block;
+            line-height: 1.3;
+            font-weight: bold;
+            color: #d1b786;
+            letter-spacing: 0.05em;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .p-line1 { 
+            font-size: 8px; 
+            margin-bottom: 4px; 
+        }
+        
+        .p-line2 { 
+            font-size: 6px;
+            transform-origin: center top;
+        }
+
+        .card-body-flat { flex-grow: 1; width: 100%; }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .span-2 { grid-column: 1 / -1; }
+        .form-group { display: flex; flex-direction: column; }
+
+        @media (min-width: 1024px) {
+            .card-content-wrapper {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            .preview-area {
+                flex-shrink: 0;
+                width: 350px;
+                margin-right: 20px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        label { font-size: 18px; font-weight: bold; margin-bottom: 6px; color: #173064; }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            height: 42px;
+            background-color: #fff;
+            transition: border-color 0.2s;
+        }
+
+        .instruction-image-wrapper { text-align: center; margin: 20px auto; }
+        .instruction-image { width: 100%; height: auto; display: block; margin: 0 auto; }
+        .desktop-only { max-width: 900px; }
+        .mobile-only { max-width: 100%; }
+
+        @media (max-width: 768px) {
+            .desktop-only { display: none; }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-only { display: none; }
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .gray-text { color: #888 !important; }
+
+        .btn-group { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        button:active { transform: scale(0.98); }
+        .btn-blue { background: #173064; color: white; }
+        .btn-green { background: #2e7d32; color: white; }
+        .btn-red { background: #c62828; color: white; }
+        .btn-gold { background: #d4b484; color: white; }
+        .btn-gray { background: #6b7c93; color: white; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .bottom-actions {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .action-btns-container {
+            display: flex; gap: 14px; width: 100%; padding-left: 10px;
+        }
+
+        #final_price {
+            width: 100%; color: black; font-size: 18px; line-height: 1.8; margin-bottom: 5px;
+        }
+
+        #copyButton {
+            background-color: #d32f2f; color: white; font-size: 18px; padding: 15px 30px;
+            border: 2px solid white; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+            animation: pulse-animation 2s infinite; margin-top: 15px;
+        }
+        
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(211, 47, 47, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+        }
+
+        .font-kai { font-family: "KaiTi", "BiauKai", "DFKai-SB", "標楷體", serif; }
+        .font-heavy { font-family: "Microsoft JhengHei", "Noto Serif TC", sans-serif; font-weight: 900; }
+        .font-script { font-family: "Dancing Script", "Kunstler Script", cursive; font-style: italic; }
+
+        .highlighted { 
+            display: none; background: #e3f2fd; padding: 15px; border-radius: 8px; 
+            margin-top: 15px; text-align: center; color: #0d47a1; font-weight: bold; font-size: 20px; 
+        }
+        
+        .price { display: none; text-align: center; }
+        
+        #myConfirm { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 9999; 
+        }
+        .modal-content {
+            background: #fff; padding: 30px; border-radius: 12px; text-align: center; 
+            width: 90%; max-width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+        }
+    </style>
 </head>
-
 <body>
-<div class="mode">
-  <label><strong>1. 流程說明:</strong></label>
-  <ol style="margin-top:8px; line-height:1.8;">
-    <li>正確填寫下表需求及內容，以及連絡方式。</li>
-    <li>可先點選【估價】確認電繡金額。</li>
-    <li>
-      所有資料確認無誤後，務必點選【
-      <span style="color:red; font-weight:bold;">估價並送單</span>
-      】，愛理才會收到您的電繡申請。
-    </li>
-    <li>
-      系統將於同頁面提供「
-      <span style="color:red;">電繡單單號</span>
-      」及「
-      <span style="color:red;">電繡需下單數量</span>
-      」。
-    </li>
-    <li>
-      於官網下訂時，電繡請依照「
-      <span style="color:red;">電繡需下單數量</span>
-      」進行訂購。
-    </li>
-    <li>
-      請將「
-      <span style="color:red;">電繡單單號</span>
-      」填寫於官網結帳頁面的【
-      <span style="color:red;">訂單備註</span>
-      】欄位內。
-    </li>
-    <li>官網訂單付款完成後，愛理即會開始製作。</li>
-    <li><span style="color:black; font-weight:bold;">電繡內容限中文6字或英數符號20字內，超過會自動刪除。</span></li>
-  </ol>
-  <p style="margin-top:12px; 
-         color:red; 
-         font-weight:bold;
-         background-color: #fff3cd;
-         padding: 10px 12px;
-         border-radius: 6px;">
-  提醒您：客製化商品於下單付款完成後，恕無法修改內容或取消訂單，
-  請確認完整無誤後再送單及下訂。
-</p>
+<div class="container">
+    <div class="instruction-image-wrapper">
+        <img src="https://img.shoplineapp.com/media/image_clips/69843b90d68e93f4bb6ffc20/original.jpg?1770273680=&owner_id=6296d12d93deb3003127c0e8" alt="電繡流程說明（電腦版）" class="instruction-image desktop-only">
+        <img src="https://img.shoplineapp.com/media/image_clips/698543a3a285bbab87c9193a/original.jpg?1770341282=&owner_id=6296d12d93deb3003127c0e8" alt="電繡流程說明（手機版）" class="instruction-image mobile-only">
+    </div>
 </div>
-<br />
 
-<!--每件繡不一樣-->
-<div class="fill2" style="display:block">
-<label><strong>2. 填寫需求及內容:</strong></label><br /><br />
-訂單號: <input id="input_ordernumber" placeholder="M12345 or #20250101123456 尚未有訂單號可免填" size="50"><br /><br />
+<div class="container">
+    <!-- 修復點：將 form 移至 container 直屬層級，包裹所有區塊 -->
+    <form id="orderForm">
+        <div class="section-box" style="margin-top:25px;">
+            <strong class="section-header-text">填寫需求及內容</strong>
 
-<form id="orderForm">
-<table class="table2" border="0">
-    <thead>
-    <tr>
-	    <th>序號</th>
-		<th>商品貨號</th>
-		<th>顏色</th>
-		<th>袖長</th>
-        <th>尺寸</th>
-        <th>件數</th>
-		<th>電繡位置</th>
-		<th>電繡顏色</th>
-		<th>電繡字體(第一行)</th>
-		<th>
-		  電繡內容(第一行)<br />
-		  <span style="font-size: 12px; color:#666;">
-			字數超過自動刪除
-		  </span>
-		</th>
-		<th>電繡字體(第二行)</th>
-		<th>電繡內容(第二行)<br />
-		  <span style="font-size: 12px; color:#666;">
-			字數超過自動刪除
-		  </span></th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr id="clo2">
-        <td class="td2">1</td>
+            <div id="cardContainer">
+                <div class="order-card card-item td2_row">
+                    <div class="card-header">
+                        <div class="card-index td2">1</div>
+                    </div>
+
+                    <div class="card-content-wrapper">
+                        <div class="preview-area">
+                            <div class="preview-box">
+                                <div class="zoom-wrapper">
+                                    <img src="https://img.shoplineapp.com/media/image_clips/6983f9efaa3fc852506c208d/original.jpg?1770256879=&owner_id=6296d12d93deb3003127c0e8" alt="電繡示意圖" class="preview-img default-preview-img">
+                                    <img src="" alt="商品款式預覽" class="preview-img dynamic-preview-img">
+                                    <div class="preview-text-layer">
+                                        <span class="p-text-line p-line1"></span>
+                                        <span class="p-text-line p-line2"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="preview-tip"><span>示意圖僅供參考，實際電繡位置、尺寸及比例</span><span>將依衣款版型與實際製作為準。</span></div>
+                        </div>
+
+                        <div class="card-body-flat">
+                            <div class="input-grid">
+                                <div class="form-group">
+                                    <label>商品貨號</label>
+                                    <select class="s_product-code gray-text" name="product_code[]" required>
+                                        <option value="" selected disabled hidden>請選擇</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>顏色</label>
+                                    <select class="s_color gray-text" name="s_color[]" required><option value="">請選擇</option></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>袖長</label>
+                                    <select class="s_sleeve gray-text" name="s_sleeve[]" required><option value="">請選擇</option></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>尺寸</label>
+                                    <select class="s_size gray-text" name="s_size[]" required>
+                                        <option value="" selected disabled hidden>請選擇</option>
+                                        <option value="整批繡一樣">整批繡一樣</option>
+                                        <option value="XS">XS</option>
+                                        <option value="S">S</option>
+                                        <option value="M">M</option>
+                                        <option value="L">L</option>
+                                        <option value="XL">XL</option>
+                                        <option value="2XL">2XL</option>
+                                        <option value="3XL">3XL</option>
+                                        <option value="4XL">4XL</option>
+                                        <option value="5XL">5XL</option>
+                                    </select>
+                                </div>
+                                <div class="form-group span-2">
+                                    <label>件數</label>
+                                    <input type="number" class="i_number" name="i_number[]" value="1" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>位置</label>
+                                    <select class="s_position gray-text" name="s_position[]" required>
+                                        <option value="" selected disabled hidden>請選擇</option>
+                                        <option value="left_chest">左胸口處</option>
+                                        <option value="right_chest">右胸口處</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>繡線顏色</label>
+                                    <select class="s_embroidery_color gray-text" name="s_embroidery_color[]" required>
+                                        <option value="" selected disabled hidden>請選擇</option>
+                                        <option value="700_apple_red">700 蘋果紅</option>
+                                        <option value="535_orange_red">535 橘紅色</option>
+                                        <option value="525_golden_yellow">525 金黃色</option>
+                                        <option value="233_apple_green">233 青蘋綠</option>
+                                        <option value="323_teal">323 藍綠色</option>
+                                        <option value="367_royal_blue">367 寶藍色</option>
+                                        <option value="335_navy">335 丈青色</option>
+                                        <option value="676_dark_purple">676 深紫色</option>
+                                        <option value="745_bronze">745 古銅色</option>
+                                        <option value="900_black">900 時尚黑</option>
+                                        <option value="800_white">800 天使白</option>
+                                        <option value="485_silver_gray">485 銀灰色</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>字體(第一行)</label>
+                                    <select class="s_font gray-text" name="s_font[]" required>
+                                        <option value="" selected disabled hidden>請選擇</option>
+                                        <option value="ch_kai">中文-標楷體</option>
+                                        <option value="ch_heavy">中文-華康中黑體</option>
+                                        <option value="en_kai">英文-標楷體</option>
+                                        <option value="en_kunstler_script">英文-Kunstler Script</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>內容(第一行)</label> 
+                                    <input class="embroidery1" name="i_embroidery1[]" placeholder="中文6字/英數20字內" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>字體(第二行)</label>
+                                    <select class="s_font2 gray-text" name="s_font2[]">
+                                        <option value="">請選擇</option>
+                                        <option value="ch_kai">中文-標楷體</option>
+                                        <option value="ch_heavy">中文-華康中黑體</option>
+                                        <option value="en_kai">英文-標楷體</option>
+                                        <option value="en_kunstler_script">英文-Kunstler Script</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>內容(第二行)</label>
+                                    <input class="embroidery2" name="i_embroidery2[]" placeholder="選填">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn-blue" id="btnAddRow">新增</button>
+                <button type="button" class="btn-gray" id="btnCopyRow">複製</button>
+                <button type="button" class="btn-gold" id="btnDelRow">刪除最後一行</button>
+            </div>
+        </div>
+
+        <!-- 修復點：移除錯誤嵌套的 Container，將區塊平行排列 -->
+        <div class="section-box">
+            <strong class="section-header-text">聯絡方式</strong>
+            <div class="contact-grid">
+                <div class="form-group">
+                    <label for="input_company">單位名稱</label>
+                    <input id="input_company" name="user_company" required>
+                </div>
+                <div class="form-group">
+                    <label for="input_name">聯絡人姓名</label>
+                    <input id="input_name" name="user_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="input_phone">電話</label>
+                    <input id="input_phone" name="user_phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="input_email">e-mail</label>
+                    <input id="input_email" type="email" name="user_email" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="bottom-actions" style="border-top: none; margin-top: 0; padding-top: 0;">
+                <div id="final_price"></div>
+                <div class="action-btns-container">
+                    <button type="button" id="nosave" class="btn-blue">估價</button>
+                    <button type="submit" id="save" class="btn-gold">估價並送單</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 必要的 Hidden Inputs -->
+        <input type="hidden" name="table_content" id="table_content">
+        <input type="hidden" name="user_serialnumber" id="user_serialnumber">
+    </form>
+
+    <div id="display_serialnumber" class="highlighted"></div>
+    <div class="price">
+        <button type="button" id="copyButton">按此複製電繡單單號</button>
+    </div>
+</div>
+
+<div id="myConfirm">
+    <div class="modal-content">
+        <h3>確認送出</h3>
+        <p>確定輸入都正確並準備開始估價存檔嗎?</p>
+        <p style="color:#c62828; font-weight:bold; margin: 15px 0;">!! 請記得<span style="font-size:1.2em;">複製電繡單號</span>到訂單備註欄 !!</p>
+        <div class="btn-group" style="justify-content: center;">
+            <button id="okBtn" class="btn-blue">確定</button>
+            <button id="cancelBtn" class="btn-gray">取消</button>
+        </div>
+    </div>
+</div>
+
 <script>
-const colorMap = {
-  "A148": { "A0": "寶寶粉", "W0": "純粹白" },
-  "A204": { "A0": "寶寶粉", "B0": "寶寶藍", "W0": "純粹白" },
-  "A222": { "B0": "寶寶藍" },
-  "A246": { "A0": "寶寶粉", "C0": "丁香紫" },
-  "A248": { "A0": "寶寶粉", "W0": "純粹白" },
-  "A302": { "W0": "純粹白" },
-  "A305": { "W0": "純粹白" },
-  "A502": { "W0": "純粹白" },
-  "A505": { "W0": "純粹白" },
-
-  "AB251": { "A2": "梅子粉", "C2": "迷霧紫", "F0": "粉霧橘", "F1": "杏仁奶" },
-  "AB252": { "E2": "雪松綠", "W3": "蓋亞灰", "W6": "灰蒼藍", "W7": "暗岩灰" },
-  "AB719": { "A2": "梅子粉", "B5": "北歐藍", "B7": "蔚海藍", "C2": "迷霧紫", "E2": "雪松綠", "F0": "粉霧橘", "F1": "杏仁奶", "F8": "礦物棕", "W3": "蓋亞灰", "W6": "灰蒼藍" },
-
-  "AC719": { "B9": "深海藍", "F7": "暗棗紅", "W7": "暗岩灰", "W9": "石墨黑" },
-
-  "AS136": { "W7": "暗岩灰" },
-  "AS150": { "B0": "寶寶藍", "B9": "深海藍" },
-  "AS250": { "B0": "寶寶藍", "B9": "深海藍" },
-  "AS251": { "A0": "寶寶粉", "B0": "寶寶藍", "B9": "深海藍", "W0": "純粹白" },
-  "AS716": { "A0": "寶寶粉", "C0": "丁香紫", "C7": "葡萄紫", "F1": "卡其灰", "W8": "夜幕黑" },
-  "AS7161": { "W8": "夜幕黑" },
-  "AS717": { "A9": "釀酒紅", "C7": "葡萄紫", "W6": "灰蒼藍" },
-  "AS718": { "B0": "寶寶藍", "W6": "灰蒼藍", "W7": "暗岩灰", "W8": "夜幕黑" },
-  "AS7181": { "B0": "寶寶藍", "W6": "灰蒼藍", "W7": "暗岩灰", "W8": "夜幕黑" },
-  "AS804": { "B9": "深海藍" },
-
-  "B101": { "A0": "寶寶粉", "B0": "寶寶藍" },
-  "B108": { "A0": "寶寶粉", "C0": "丁香紫", "W0": "純粹白" },
-  "B110": { "C0": "丁香紫", "D0": "天堂藍" },
-  "B111": { "A0": "寶寶粉", "B0": "寶寶藍" },
-  "B122": { "C0": "丁香紫", "D0": "天堂藍" },
-  "B133": { "A0": "寶寶粉" },
-  "B201": { "A0": "寶寶粉", "B0": "寶寶藍", "W0": "純粹白" },
-  "B202": { "W0": "純粹白" },
-  "B204": { "A0": "寶寶粉", "D0": "天堂藍", "W0": "純粹白" },
-  "B208": { "A0": "寶寶粉", "C0": "丁香紫", "W0": "純粹白" },
-  "B210": { "C0": "丁香紫", "D0": "天堂藍" },
-  "B211": { "A0": "寶寶粉", "B0": "寶寶藍", "W0": "純粹白" },
-  "B222": { "A0": "寶寶粉" },
-  "B233": { "A0": "寶寶粉" },
-  "B235": { "W0": "純粹白" },
-  "B241": { "A0": "寶寶粉", "C0": "丁香紫" },
-  "B302": { "W0": "純粹白" },
-  "B304": { "W0": "純粹白" },
-  "B305": { "W0": "純粹白" },
-  "B502": { "W0": "純粹白" },
-  "B505": { "W0": "純粹白" },
-  "B603": { "D0": "天堂藍" },
-  "B608": { "D0": "天堂藍" },
-  "B801": { "A0": "寶寶粉", "W0": "純粹白" },
-  "B802": { "A0": "寶寶粉", "W0": "純粹白" },
-
-  "C302": { "W0": "純粹白" },
-  "C303": { "W0": "純粹白" },
-  "C304": { "W0": "純粹白" },
-  "C503": { "W0": "純粹白" },
-  "C605": { "B9": "深海藍" },
-  "C605A": { "B9": "深海藍" },
-  "C709": { "A3": "珊瑚粉", "B7": "寶石藍", "B9": "深海藍", "C7": "葡萄紫", "F7": "暗棗紅" },
-  "C7091": { "B7": "寶石藍", "B9": "深海藍" },
-  "C713": { "C6": "亮紫紅", "E5": "抹茶綠", "F5": "豆沙紅" },
-  "C714": { "A3": "珊瑚粉", "B9": "深海藍", "C0": "丁香紫" },
-  "C805N1": { "A0": "寶寶粉", "B0": "寶寶藍" },
-
-  "D303": { "W0": "純粹白" },
-  "D305": { "W0": "純粹白" },
-  "D503": { "W0": "純粹白" },
-
-  "F603": { "A0": "寶寶粉", "B0": "寶寶藍", "C0": "丁香紫", "E0": "果子綠" },
-  "F6041": { "A0": "寶寶粉", "B0": "寶寶藍", "E0": "果子綠" },
-  "F605": { "A0": "寶寶粉", "C0": "丁香紫", "E0": "果子綠" },
-  "F605A": { "A0": "寶寶粉", "C0": "丁香紫", "E0": "果子綠" },
-  "F608": { "A0": "寶寶粉" },
-  "F609": { "A0": "寶寶粉", "B0": "寶寶藍", "C0": "丁香紫", "E0": "果子綠" },
-  "F611": { "B0": "寶寶藍", "C0": "丁香紫", "E0": "果子綠" },
-
-  "I245": { "A0": "寶寶粉", "B0": "寶寶藍" },
-  "I704": { "A0": "寶寶粉", "B0": "寶寶藍" },
-  "I712": { "A0": "寶寶粉", "B0": "寶寶藍" },
-
-  "W403": { "A0": "寶寶粉", "A6": "亮桃紅", "B0": "寶寶藍", "B9": "深海藍", "C7": "葡萄紫" },
-  "W4031": { "B9": "深海藍" },
-  "W460": { "A1": "活潑粉", "B9": "深海藍", "C7": "葡萄紫" }
+// 實際專案中建議將此數據移至外部檔案
+const PRODUCT_DATA = {
+    COLORS: {
+        "A148": { "A0": { name: "A0寶寶粉", img: "" }, "W0": { name: "W0純粹白", img: "https://img.shoplineapp.com/media/image_clips/6a44bd324f4a30c119c091d1/original.png?1782889777=&owner_id=6296d12d93deb3003127c0e8" } },
+        "A204": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "https://img.shoplineapp.com/media/image_clips/6a44bd3253ab5a8793c928fb/original.png?1782889777=&owner_id=6296d12d93deb3003127c0e8" }, "W0": { name: "W0純粹白", img: "" } },
+        "A222": { "B0": { name: "B0寶寶藍", img: "" } },
+        "A246": { "A0": { name: "A0寶寶粉", img: "" }, "C0": { name: "C0丁香紫", img: "https://img.shoplineapp.com/media/image_clips/699c2529bb80cb69f8bad0d5/original.png?1771840809=&owner_id=6296d12d93deb3003127c0e8" } },
+        "A248": { "A0": { name: "A0寶寶粉", img: "" }, "W0": { name: "W0純粹白", img: "" } },
+        "A302": { "W0": { name: "W0純粹白", img: "" } }, "A305": { "W0": { name: "W0純粹白", img: "" } }, "A502": { "W0": { name: "W0純粹白", img: "" } }, "A505": { "W0": { name: "W0純粹白", img: "" } },
+        "AB251": { "A2": { name: "A2梅子粉", img: "" }, "C2": { name: "C2迷霧紫", img: "" }, "F0": { name: "F0粉霧橘", img: "" }, "F1": { name: "F1杏仁奶", img: "" } },
+        "AB252": { "E2": { name: "E2雪松綠", img: "" }, "W3": { name: "W3蓋亞灰", img: "" }, "W6": { name: "W6灰蒼藍", img: "" }, "W7": { name: "W7暗岩灰", img: "" } },
+        "AB719": { "A2": { name: "A2梅子粉", img: "" }, "B5": { name: "B5北歐藍", img: "" }, "B7": { name: "B7蔚海藍", img: "" }, "C2": { name: "C2迷霧紫", img: "" }, "E2": { name: "E2雪松綠", img: "" }, "F0": { name: "F0粉霧橘", img: "" }, "F1": { name: "F1杏仁奶", img: "" }, "F8": { name: "F8礦物棕", img: "" }, "W3": { name: "W3蓋亞灰", img: "" }, "W6": { name: "W6灰蒼藍", img: "" } },
+        "AC719": { "B9": { name: "B9深海藍", img: "" }, "F7": { name: "F7暗棗紅", img: "" }, "W7": { name: "W7暗岩灰", img: "" }, "W9": { name: "W9石墨黑", img: "" } },
+        "AS136": { "W7": { name: "W7暗岩灰", img: "" } }, "AS150": { "B0": { name: "B0寶寶藍", img: "" }, "B9": { name: "B9深海藍", img: "" } }, "AS250": { "B0": { name: "B0寶寶藍", img: "https://img.shoplineapp.com/media/image_clips/6989400d0127d75c052e4f84/original.png?1770602508=&owner_id=6296d12d93deb3003127c0e8" }, "B9": { name: "B9深海藍", img: "" } },
+        "AS251": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" }, "B9": { name: "B9深海藍", img: "" }, "W0": { name: "W0純粹白", img: "https://img.shoplineapp.com/media/image_clips/6a44c1f8a81765bbd5b3d37a/original.png?1782891000=&owner_id=6296d12d93deb3003127c0e8" } },
+        "AS716": { "A0": { name: "A0寶寶粉", img: "" }, "C0": { name: "C0丁香紫", img: "" }, "C7": { name: "C7葡萄紫", img: "" }, "F1": { name: "F1卡其灰", img: "" }, "W8": { name: "W8夜幕黑", img: "" } },
+        "AS7161": { "W8": { name: "W8夜幕黑", img: "" } }, "AS717": { "A9": { name: "A9釀酒紅", img: "" }, "C7": { name: "C7葡萄紫", img: "" }, "W6": { name: "W6灰蒼藍", img: "" } },
+        "AS718": { "B0": { name: "B0寶寶藍", img: "" }, "W6": { name: "W6灰蒼藍", img: "" }, "W7": { name: "W7暗岩灰", img: "" }, "W8": { name: "W8夜幕黑", img: "" } },
+        "AS7181": { "B0": { name: "B0寶寶藍", img: "" }, "W6": { name: "W6灰蒼藍", img: "" }, "W7": { name: "W7暗岩灰", img: "https://img.shoplineapp.com/media/image_clips/699c2529c2772b5e6b14faaf/original.png?1771840809=&owner_id=6296d12d93deb3003127c0e8" }, "W8": { name: "W8夜幕黑", img: "" } },
+        "AS804": { "B9": { name: "B9深海藍", img: "" } }, "B101": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" } },
+        "B108": { "A0": { name: "A0寶寶粉", img: "" }, "C0": { name: "C0丁香紫", img: "" }, "W0": { name: "W0純粹白", img: "" } },
+        "B110": { "C0": { name: "C0丁香紫", img: "https://img.shoplineapp.com/media/image_clips/6a44c82be409c4ca13a5a04a/original.png?1782892586=&owner_id=6296d12d93deb3003127c0e8" }, "D0": { name: "D0天堂藍", img: "" } }, "B111": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" } },
+        "B122": { "C0": { name: "C0丁香紫", img: "" }, "D0": { name: "D0天堂藍", img: "" } }, "B133": { "A0": { name: "A0寶寶粉", img: "" } },
+        "B201": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" }, "W0": { name: "W0純粹白", img: "" } }, "B202": { "W0": { name: "W0純粹白", img: "" } },
+        "B204": { "A0": { name: "A0寶寶粉", img: "" }, "D0": { name: "D0天堂藍", img: "" }, "W0": { name: "W0純粹白", img: "" } },
+        "B208": { "A0": { name: "A0寶寶粉", img: "" }, "C0": { name: "C0丁香紫", img: "" }, "W0": { name: "W0純粹白", img: "" } },
+        "B210": { "C0": { name: "C0丁香紫", img: "" }, "D0": { name: "D0天堂藍", img: "" } }, "B211": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" }, "W0": { name: "W0純粹白", img: "" } },
+        "B222": { "A0": { name: "A0寶寶粉", img: "https://img.shoplineapp.com/media/image_clips/6989400de639c328f8151ce5/original.png?1770602508=&owner_id=6296d12d93deb3003127c0e8" } }, "B233": { "A0": { name: "A0寶寶粉", img: "" } }, "B235": { "W0": { name: "W0純粹白", img: "" } },
+        "B241": { "A0": { name: "A0寶寶粉", img: "https://img.shoplineapp.com/media/image_clips/6989400dbde80224c20263ab/original.png?1770602508=&owner_id=6296d12d93deb3003127c0e8" }, "C0": { name: "C0丁香紫", img: "" } }, "B302": { "W0": { name: "W0純粹白", img: "" } },
+        "B304": { "W0": { name: "W0純粹白", img: "" } }, "B305": { "W0": { name: "W0純粹白", img: "" } }, "B502": { "W0": { name: "W0純粹白", img: "" } },
+        "B505": { "W0": { name: "W0純粹白", img: "" } }, "B603": { "D0": { name: "D0天堂藍", img: "" } }, "B608": { "D0": { name: "D0天堂藍", img: "" } },
+        "B801": { "A0": { name: "A0寶寶粉", img: "" }, "W0": { name: "W0純粹白", img: "" } }, "B802": { "A0": { name: "A0寶寶粉", img: "" }, "W0": { name: "W0純粹白", img: "" } },
+        "C302": { "W0": { name: "W0純粹白", img: "" } }, "C303": { "W0": { name: "W0純粹白", img: "" } }, "C304": { "W0": { name: "W0純粹白", img: "" } },
+        "C503": { "W0": { name: "W0純粹白", img: "" } }, "C605": { "B9": { name: "B9深海藍", img: "" } }, "C605A": { "B9": { name: "B9深海藍", img: "" } },
+        "C709": { "A3": { name: "A3珊瑚粉", img: "" }, "B7": { name: "B7寶石藍", img: "" }, "B9": { name: "B9深海藍", img: "" }, "C7": { name: "C7葡萄紫", img: "" }, "F7": { name: "F7暗棗紅", img: "" } },
+        "C7091": { "B7": { name: "B7寶石藍", img: "" }, "B9": { name: "B9深海藍", img: "" } }, "C713": { "C6": { name: "C6亮紫紅", img: "" }, "E5": { name: "E5抹茶綠", img: "" }, "F5": { name: "F5豆沙紅", img: "" } },
+        "C714": { "A3": { name: "A2珊瑚粉", img: "" }, "B9": { name: "B9深海藍", img: "" }, "C0": { name: "C0丁香紫", img: "https://img.shoplineapp.com/media/image_clips/6989400d9a592e163c67772d/original.png?1770602508=&owner_id=6296d12d93deb3003127c0e8" } }, "C805N1": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" } },
+        "D303": { "W0": { name: "W0純粹白", img: "" } }, "D305": { "W0": { name: "W0純粹白", img: "" } }, "D503": { "W0": { name: "W0純粹白", img: "" } },
+        "F603": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" }, "C0": { name: "C0丁香紫", img: "" }, "E0": { name: "E0果子綠", img: "" } },
+        "F6041": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" }, "E0": { name: "E0果子綠", img: "" } },
+        "F605": { "A0": { name: "A0寶寶粉", img: "" }, "C0": { name: "C0丁香紫", img: "" }, "E0": { name: "E0果子綠", img: "" } },
+        "F605A": { "A0": { name: "A0寶寶粉", img: "" }, "C0": { name: "C0丁香紫", img: "" }, "E0": { name: "E0果子綠", img: "" } },
+        "F608": { "A0": { name: "A0寶寶粉", img: "" } }, "F609": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" }, "C0": { name: "C0丁香紫", img: "" }, "E0": { name: "E0果子綠", img: "" } },
+        "F611": { "B0": { name: "B0寶寶藍", img: "" }, "C0": { name: "C0丁香紫", img: "" }, "E0": { name: "E0果子綠", img: "" } },
+        "I245": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" } }, "I704": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" } },
+        "I712": { "A0": { name: "A0寶寶粉", img: "" }, "B0": { name: "B0寶寶藍", img: "" } },
+        "W403": { "long": "長袖" }, "W4031": { "long": "長袖" }, "W460": { "none": "無袖" }
+    },
+    SLEEVES: {
+        "A148": { "short": "短袖", "three_quarter": "七分袖" }, "A204": { "short": "短袖", "long": "長袖" },
+        "A222": { "short": "短袖" }, "A246": { "short": "短袖", "long": "長袖" },
+        "A248": { "short": "短袖", "three_quarter": "七分袖" }, "A302": { "long": "長袖" },
+        "A305": { "long": "長袖" }, "A502": { "long": "長袖" }, "A505": { "long": "長袖" },
+        "AB251": { "short": "短袖" }, "AB252": { "short": "短袖"}, "AB719": { "short": "短袖" },
+        "AC719": { "short": "短袖" }, "AS136": { "short": "短袖" }, "AS150": { "three_quarter": "七分袖" },
+        "AS250": { "three_quarter": "七分袖" }, "AS251": { "short": "短袖" },
+        "AS716": { "short": "短袖", "three_quarter": "七分袖" }, "AS7161": { "short": "短袖" },
+        "AS717": { "short": "短袖" }, "AS718": { "short": "短袖" }, "AS7181": { "short": "短袖" },
+        "AS804": { "short": "短袖" }, "B101": {"short": "短袖", "three_quarter": "七分袖" },
+        "B108": { "short": "短袖", "three_quarter": "七分袖" }, "B110": {"short": "短袖" },
+        "B111": { "short": "短袖" }, "B122": { "short": "短袖" }, "B133": { "short": "短袖" },
+        "B201": { "short": "短袖", "three_quarter": "七分袖" }, "B202": { "short": "短袖", "long": "長袖" },
+        "B204": { "short": "短袖", "long": "長袖" }, "B208": { "short": "短袖", "three_quarter": "七分袖" },
+        "B210": { "short": "軟袖" }, "B211": { "short": "短袖", "long": "長袖" },
+        "B222": { "short": "短袖", "long": "長袖" }, "B233": { "short": "短袖", "three_quarter": "七分袖" },
+        "B235": { "three_quarter": "七分袖" }, "B241": { "short": "短袖", "long": "長袖" },
+        "B302": { "long": "長袖" }, "B304": { "short": "短袖", "long": "長袖" },
+        "B305": { "long": "長袖" }, "B502": { "long": "長袖" }, "B505": { "long": "長袖" },
+        "B603": { "none": "無袖"}, "B608": { "none": "無袖"}, "B801": { "short": "短袖" },
+        "B802": { "short": "短袖" }, "C302": { "long": "長袖" }, "C303": { "short": "短袖" },
+        "C304": {"short": "短袖" }, "C503": { "short": "短袖" }, "C605": { "none": "無袖" },
+        "C605A": { "none": "無袖" }, "C709": { "short": "短袖" }, "C7091": { "short": "短袖" },
+        "C713": { "short": "短袖" }, "C714": { "short": "短袖" }, "C805N1": { "long": "長袖" },
+        "D303": { "short": "短袖", "long": "長袖" }, "D305": { "long": "長袖" },
+        "D503": { "short": "短袖", "long": "長袖" }, "F603": {"none": "無袖" },
+        "F6041": { "none": "無袖" }, "F605": { "none": "無袖" }, "F605A": { "none": "無袖" },
+        "F608": { "none": "無袖" }, "F609": { "none": "無袖" }, "F611": {"none": "無袖" },
+        "I245": {"short": "短袖" }, "I704": {"short": "短袖"}, "I712": { "short": "長袖" },
+        "W403": { "long": "長袖" }, "W4031": { "long": "長袖" }, "W460": { "none": "無袖" }
+    }
 };
 
-</script>
-<script>
-document.addEventListener("change", function(e) {
-
-  if (e.target.classList.contains("s_product-code")) {
-
-    const productSelect = e.target;
-    const selectedCode = productSelect.value;
-
-    // 找同一列的顏色 select
-    const colorSelect = productSelect.closest("tr").querySelector(".s_color");
-
-    // 清空舊顏色
-    colorSelect.innerHTML = '<option value="">請選擇</option>';
-
-    // 依貨號加入顏色 (物件格式)
-    if (colorMap[selectedCode]) {
-      for (const code in colorMap[selectedCode]) {
-        const opt = document.createElement("option");
-        opt.value = code + colorMap[selectedCode][code]; // value 可用代碼+中文
-        opt.textContent = `${code} ${colorMap[selectedCode][code]}`; // 顯示「代碼 中文名稱」
-        colorSelect.appendChild(opt);
-      }
-    }
-  }
-
-});
-</script>
-		<td>
-			<select id="product-code" name="product_code[]" class="s_product-code" style="width:100px">
-				<option value="">請選擇</option>
-				<option value="A148">A148</option>
-				<option value="A204">A204</option>
-				<option value="A222">A222</option>
-				<option value="A246">A246</option>
-				<option value="A248">A248</option>
-				<option value="A302">A302</option>
-				<option value="A305">A305</option>
-				<option value="A502">A502</option>
-				<option value="A505">A505</option>
-				<option value="AB251">AB251</option>
-				<option value="AB252">AB252</option>
-				<option value="AB719">AB719</option>
-				<option value="AC719">AC719</option>
-				<option value="AS136">AS136</option>
-				<option value="AS150">AS150</option>
-				<option value="AS250">AS250</option>
-				<option value="AS251">AS251</option>
-				<option value="AS716">AS716</option>
-				<option value="AS7161">AS7161</option>
-				<option value="AS717">AS717</option>
-				<option value="AS718">AS718</option>
-				<option value="AS7181">AS7181</option>
-				<option value="AS804">AS804</option>
-				<option value="B101">B101</option>
-				<option value="B108">B108</option>
-				<option value="B110">B110</option>
-				<option value="B111">B111</option>
-				<option value="B122">B122</option>
-				<option value="B133">B133</option>
-				<option value="B201">B201</option>
-				<option value="B202">B202</option>
-				<option value="B204">B204</option>
-				<option value="B208">B208</option>
-				<option value="B210">B210</option>
-				<option value="B211">B211</option>
-				<option value="B222">B222</option>
-				<option value="B233">B233</option>
-				<option value="B235">B235</option>
-				<option value="B241">B241</option>
-				<option value="B302">B302</option>
-				<option value="B304">B304</option>
-				<option value="B305">B305</option>
-				<option value="B502">B502</option>
-				<option value="B505">B505</option>
-				<option value="B603">B603</option>
-				<option value="B608">B608</option>
-				<option value="B801">B801</option>
-				<option value="B802">B802</option>
-				<option value="C302">C302</option>
-				<option value="C303">C303</option>
-				<option value="C304">C304</option>
-				<option value="C503">C503</option>
-				<option value="C605">C605</option>
-				<option value="C605A">C605A</option>
-				<option value="C7021">C7021</option>
-				<option value="C709">C709</option>
-				<option value="C7091">C7091</option>
-				<option value="C713">C713</option>
-				<option value="C714">C714</option>
-				<option value="C805N1">C805N1</option>
-				<option value="D303">D303</option>
-				<option value="D305">D305</option>
-				<option value="D503">D503</option>
-				<option value="F603">F603</option>
-				<option value="F6041">F6041</option>
-				<option value="F605">F605</option>
-				<option value="F605A">F605A</option>
-				<option value="F608">F608</option>
-				<option value="F609">F609</option>
-				<option value="F611">F611</option>
-				<option value="I245">I245</option>
-				<option value="I704">I704</option>
-				<option value="I712">I712</option>
-				<option value="W403">W403</option>
-				<option value="W4031">W4031</option>
-				<option value="W460">W460</option>
-			  </select>
-		</td>
-
-<script>
-  $(document).ready(function() {
-    $('#product-code').select({
-      placeholder: "請選擇或輸入貨號",
-      allowClear: true
-    });
-  });
-</script>
-
-		<td>
-		  <select class="s_color" name="s_color[]" style="width:100px">
-			<option value="">請選擇</option>
-		  </select>
-		</td>
-        <td> <select class="s_sleeve" name="s_sleeve[]"> <!-- 袖長 -->
-			    <option value="">請選擇</option>
-				<option value="short">短袖</option>
-				<option value="long">長袖</option>
-				<option value="three_quarter">七分袖</option>
-		     </select>
-		</td>
-		<td>
-		  <select class="s_size" name="s_size[]">
-			<option value="">請選擇</option>
-			<option value="整批繡一樣">整批繡一樣</option>
-			<option value="XS">XS</option>
-			<option value="S">S</option>
-			<option value="M">M</option>
-			<option value="L">L</option>
-			<option value="XL">XL</option>
-			<option value="2XL">2XL</option>
-			<option value="3XL">3XL</option>
-			<option value="4XL">4XL</option>
-			<option value="5XL">5XL</option>
-			<option value="6XL">6XL</option>
-			<option value="7XL">7XL</option>
-			<option value="8XL">8XL</option>
-		  </select>
-		</td>
-		<td> <input name="i_number[]" placeholder="" size="10" /></td> <!-- 件數 -->
-		<td> <select class="s_position" name="s_position[]"> <!-- 電繡位置 -->
-			    <option value="">請選擇</option>
-				<option value="left_chest">左胸口處</option>
-				<option value="right_chest">右胸口處</option>
-		     </select>
-		</td>
-		<td> <select class="s_embroidery_color" name="s_embroidery_color[]"> <!-- 電繡顏色 -->
-			    <option value="">請選擇</option>
-				<option value="700_apple_red">700 蘋果紅</option>
-				<option value="535_orange_red">535 橘紅色</option>
-				<option value="525_golden_yellow">525 金黃色</option>
-				<option value="233_apple_green">233 青蘋綠</option>
-				<option value="323_teal">323 藍綠色</option>
-				<option value="367_royal_blue">367 寶藍色</option>
-				<option value="335_navy">335 丈青色</option>
-				<option value="676_dark_purple">676 深紫色</option>
-				<option value="745_bronze">745 古銅色</option>
-				<option value="900_black">900 時尚黑</option>
-				<option value="800_white">800 天使白</option>
-				<option value="483_silver_gray">483 銀灰色</option>
-		     </select>
-		</td>
-		<td> <select class="s_font" name="s_font[]"> <!-- 電繡字體 -->
-			    <option value="">請選擇</option>
-				<option value="ch_kai">中文-標楷體</option>
-				<option value="ch_heavy">中文-華康中黑體</option>
-				<option value="en_kai">英文-標楷體</option>
-				<option value="en_arial">英文-Arial</option>
-				<option value="en_brush_script_mt">英文-Brush Script MT</option>
-				<option value="en_kunstler_script">英文-Kunstler Script</option>
-		     </select>
-		</td>
-		<!-- 電繡內容1 maxlength字數限制-->
-
-			<td><input id="embroidery1" name="i_embroidery1[]" placeholder="限中文6字/英文20字"/></td>
-			<td> <select class="s_font2" name="s_font2[]"> <!-- 電繡字體(第二行) -->
-			    <option value="">請選擇</option>
-				<option value="ch_kai">中文-標楷體</option>
-				<option value="ch_heavy">中文-華康中黑體</option>
-				<option value="en_kai">英文-標楷體</option>
-				<option value="en_arial">英文-Arial</option>
-				<option value="en_brush_script_mt">英文-Brush Script MT</option>
-				<option value="en_kunstler_script">英文-Kunstler Script</option>
-		     </select>
-		    </td>
-			<td><input id="embroidery2" name="i_embroidery2[]" placeholder="限中文6字/英文20字"/></td>
-
-			<script>
-			  const maxLength_ch = 13; // 中文模式（全形）限制
-			  const maxLength_en = 20; // 英文模式（半形）限制
-
-			  function getLength(str) {
-				let len = 0;
-				for (let char of str) {
-				  if (char.charCodeAt(0) > 255) {
-					len += 2;   // 中文 / 全形
-				  } else {
-					len += 1;   // 英文 / 半形
-				  }
-				}
-				return len;
-			  }
-
-			  function hasChinese(str) {
-				for (let char of str) {
-				  if (char.charCodeAt(0) > 255) return true;
-				}
-				return false;
-			  }
-
-			  function limitInput(input) {
-				input.addEventListener("input", function () {
-				  let value = input.value;
-				  let maxLength = hasChinese(value) ? maxLength_ch : maxLength_en;
-
-				  while (getLength(value) > maxLength) {
-					value = value.slice(0, -1);  // 即時移除最後一個字
-				  }
-
-				  input.value = value;
-				});
-			  }
-
-			  // 套用到兩個欄位
-			  limitInput(document.getElementById("embroidery1"));
-			  limitInput(document.getElementById("embroidery2"));
-			</script>
-
-		
-    </tr>
-    </tbody>
-</table>
-
-<!-- 隱藏欄位，用來放組好的 HTML 表格給 EmailJS -->
-<input type="hidden" name="table_content" id="table_content">
-<input type="hidden" name="user_name" id="user_name"> <!-- 聯絡人姓名 emailjs用-->
-<input type="hidden" name="user_email" id="user_email"> <!-- email emailjs用-->
-
-<input type="hidden" name="user_ordernumber" id="user_ordernumber"> <!-- 單號 emailjs用-->
-<input type="hidden" name="user_company" id="user_company"> <!-- 單位名稱 emailjs用-->
-<input type="hidden" name="user_phone" id="user_phone"> <!-- 電話 emailjs用-->
-
-<input type="hidden" name="user_memory" id="user_memory"> <!-- 金錢 emailjs用-->
-
-<input type="hidden" name="user_serialnumber" id="user_serialnumber"> <!-- 電繡單單號 emailjs用-->
-
-<br />
-<button type="button" onclick="fun('table2','clo2','td2')">新增一行</button>
-&nbsp;<button type="button" onclick="fun_same('table2','clo2','td2')">複製最後一行</button>
-&nbsp;<button type="button" onclick="del('table2')">刪除最後一行</button>
-
-<br />
-<br />
-</div>
-<!--
-<div class="fill3" style="display:none">
-<label><strong>繡字內容:</strong></label>
-<br />
-&nbsp;&nbsp;電繡內容(第一行): <input name="myfield3" value="愛理醫院1" size="50">
-&nbsp;&nbsp;電繡內容(第二行): <input name="myfield4" value="愛理醫院2" size="50">
-<br />
-</div>
--->
-<div class="fill4" style="display:block">
-<br />
-<label><strong>3. 聯絡方式</strong></label>
-<br /><br />
-&nbsp;&nbsp;&nbsp;&nbsp;單位名稱: <input id="input_company" name="myname" size="30"> <br /><br />
-&nbsp;&nbsp;&nbsp;&nbsp;聯絡人姓名: <input id="input_name" name="myname" size="30"> <br /><br />
-&nbsp;&nbsp;&nbsp;&nbsp;電話: <input id="input_phone" name="myphone" size="30"> <br /><br />
-&nbsp;&nbsp;&nbsp;&nbsp;e-mail: <input id="input_email" name="myemail" size="50"> <br />
-</div>
-</body>
-
-<div class="note">
-    <br />
-    <label><strong>4.</strong></label>
-    <br />
-    <label style="color: red;"><strong>只計算金額請選「估價」</strong></label>
-    <br />
-    <label style="color: red;"><strong>送出訂單請選「估價並送單」</strong></label>
-    <br />
-    <label style="color: red;"><strong>請注意，選擇「估價並送單」愛理才會收到您的訂單唷</strong></label>
-    <br />
-    <br />
-    <label style="color: blue;"><strong>☆</strong></label>
-	<br />
-	<label style="color: blue;"><strong>中文 1 字：30元</strong></label>
-	<br />
-	<label style="color: blue;"><strong>英文 1 字：15元</strong></label>
-	<br />
-	<label style="color: blue;"><strong>數字 1 字：15元</strong></label>
-	<br />
-	<label style="color: blue;"><strong>符號 1 字：15元</strong></label>
-	<br />
-	<label style="color: blue;"><strong>空　格：不算費用</strong></label>
-</div>
-
-
-<div class="botton1" style="display:block">
-<br />
-<label id="final_price" style="color:black; font-size:18px;"></label>
-<br />
-<br />
-<button type="button" id="nosave">估價</button>
-<button type="submit" id="save">估價並送單</button>
-</div>
-</form>
-
-<div id="display_serialnumber" class="highlighted"></div>
-
-<div class="price" style="display:block">
-<br />
-<label id="final_id" style="color:red;"></label>
- <button type="button" id="copyButton" style="display:none">按此複製電繡單單號</button>
-<br />
-
-</div>
-
-<!-- 客製化彈窗 -->
-<div id="myConfirm" style="display:none; 
-    position:fixed; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.5); 
-    justify-content:center; align-items:center;">
-
-	<div style="background:#fff; padding:20px; border-radius:10px; text-align:center; width:300px;">
-	  <p>確定輸入都正確並準備開始估價存檔嗎?</p>
-	  <p style="color:black; font-weight:bold;">
-	    !!請記得<span style="color:red; font-size:18px;">複製電繡單號</span>到<span style="color:red; font-size:18px;">訂單備註欄</span> !!
-	  </p>
-	  <button id="okBtn">確定</button>
-	  <button id="cancelBtn">取消</button>
-	</div>
-</div>
-
-<style>
-.highlighted {
-    color: red;
-    font-weight: bold;
-    font-size: 1.2em;
-    background-color: #fff0f0;
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-</style>
-
-<script>
-
-var final_id = "";
-var i = 1;
-var total_price = 0;
-var chinese_num = 0;
-var english_num = 0;
-var chinese_price = 0;
-var english_price = 0;
-var price_ch = 30;
-var price_en = 15;
-
-
-$(".td").each(function(){
-	$(this).html(i++);
-})
-
-function fun_same(ta, col, v) {
-    var $table = $("." + ta);
-    var $lastRow = $table.find("tr:last");
-    var $clonedLastRow = $lastRow.clone();
-
-    // 要複製的 select class 列表
-    var fieldsToCopy = [
-	    "s_product-code",
-		"s_color",
-        "s_sleeve",
-		"s_size",
-        "s_position",
-        "s_font",
-        "s_font2",
-        "s_embroidery_color"
-    ];
-
-    // 複製每個欄位的值
-    fieldsToCopy.forEach(function(className) {
-        var originalVal = $lastRow.find("." + className).val();
-        $clonedLastRow.find("." + className).val(originalVal);
-    });
-
-    // 加入複製行
-    $table.append($clonedLastRow);
-
-    // 更新序號
-    var i = 1;
-    $("." + v).each(function () {
-        $(this).html(i++);
-    });
-}
-
-function fun(ta,col,v){
-	var $td = $("#"+col).clone();       //增加一行,克隆第一個對象
-	$("."+ta).append($td);
-	var i = 1;
-	$("."+v).each(function(){       //增加一行後重新更新序號1,2,3......
-	$(this).html(i++);
-	})
-	$("."+ta+" tr:last").find(":input").val('');   //將尾行元素克隆來的保存的值清空
-}
-
-function del(ta){
-	$("."+ta+" tr:not(:first):not(:first):last").remove();//移除最後一行,並且保留前兩行
-}
-
-function sum_money(myfield) {
-		var pattern = new RegExp("[\u4E00-\u9FA5]+") //判斷中文
-		
-		var c_chinese = 0;
-		var c_other = 0;
-		var c_space = 0;
-		for (let i = 0; i < myfield.length; i++) {
-			if (pattern.test(myfield[i])) {
-			    //alert(myfield[i])
-				c_chinese++;
-			} else {
-			    //alert("不是中文:"+myfield[i])
-				if (myfield[i] != " " && myfield[i] != "　")
-				    c_other++;
-			    else
-				    c_space++;
-		    }
-		}
-		
-		var price_ch_all = c_chinese * price_ch;
-		var price_en_all = c_other * price_en;
-		var price_all = price_ch_all + price_en_all;
-		
-		return {chinese:c_chinese, other:c_other, price_ch:price_ch_all, price_en:price_en_all, price:price_all};
-}
-
-function final_cal() {
-    // Reset variables and UI elements
-    $('#final_id').text("");
-    $('#copyButton').css("display", "none");
-    $('#final_price').text("");
-    $(".price").css("display", "none");
-    final_id = "";
-    total_price = 0;
-    chinese_num = 0;
-    english_num = 0;
-    chinese_price = 0;
-    english_price = 0;
-
-    var isValid = true;
-    var errorMessage = "";
-	let errorMessages = [];
-	
-    // 檢查聯絡方式
-    var company = $('#input_company').val().trim();
-    var name    = $('#input_name').val().trim();
-    var phone   = $('#input_phone').val().trim();
-    var email   = $('#input_email').val().trim();
-
-	
-
-    // Each row of the table will be checked
-    $("." + "table2" + " tr").each(function(i) {
-        if (i !== 0) { // Skip the header row
-            var myfield1 = $(this).find('td:eq(9)').find("input").val() || "";
-            var myfield2 = $(this).find('td:eq(11)').find("input").val() || "";
-            var col_number = $(this).find('td:eq(5)').find("input").val().trim(); // Number input
-            var product_code = $(this).find(".s_product-code").val(); // Product code dropdown
-            var color = $(this).find(".s_color").val(); // Color dropdown
-            var sleeve = $(this).find(".s_sleeve").val(); // Sleeve dropdown
-            var size = $(this).find(".s_size").val(); // Size dropdown
-            var position = $(this).find(".s_position").val(); // Embroidery position dropdown
-            var font = $(this).find(".s_font").val(); // Font dropdown
-            var embroidery_color = $(this).find(".s_embroidery_color").val(); // Embroidery color dropdown
-
-            // Check for empty or default values
-			if (!product_code)
-			{
-				errorMessages.push("[商品貨號] ");
-			}
-			if (!color)
-			{
-				errorMessages.push("[顏色] ");
-			}
-			if (!sleeve)
-			{
-				errorMessages.push("[袖長] ");
-			}
-			if (!size)
-			{
-				errorMessages.push("[尺寸] ");
-			}
-			if (!col_number || parseInt(col_number) <= 0)
-			{
-				errorMessages.push("[件數] ");
-			}
-			if (!position)
-			{
-				errorMessages.push("[電繡位置] ");
-			}
-			if (!font)
-			{
-				errorMessages.push("[電繡字體] ");
-			}
-            var font2 = $(this).find(".s_font2").val(); // Get value of the new font2 dropdown
-            if (!font2)
-			{
-				errorMessages.push("[電繡字體(第二行)] ");
-			}
-			if (!embroidery_color)
-			{
-				errorMessages.push("[電繡顏色] ");
-			}
-			if (myfield1.length === 0)
-			{
-				errorMessages.push("[電繡內容(第一行)] ");
-			}
-			if (!company)
-			{
-				errorMessages.push("[單位名稱] ");
-			}
-			if (!name)
-			{
-				errorMessages.push("[聯絡人姓名] ");
-			}			
-			if (!phone)
-			{
-				errorMessages.push("[電話] ");
-			}			
-			if (!email)
-			{
-				errorMessages.push("[e-mail] ");
-			}
-        }
-    });
-
-	if (errorMessages.length > 0) {
-		errorMessages.push("\n!! 以上欄位資料不完整，請重新確認 !!");
-		alert(errorMessages.join("\n"));
-		return false; // 若是在送單前檢查，可中斷流程
-	}
-    // Continue with calculations if valid
-    $("." + "table2" + " tr").each(function(i) {
-        if (i !== 0) { // Skip the header row
-            var myfield1 = $(this).find('td:eq(9)').find("input").val() || "";
-            var myfield2 = $(this).find('td:eq(11)').find("input").val() || "";
-            var col_number = $(this).find('td:eq(5)').find("input").val();
-
-            var obj1 = sum_money(myfield1);
-            var obj2 = sum_money(myfield2);
-            total_price += (parseInt(obj1.price) * parseInt(col_number));
-            total_price += (parseInt(obj2.price) * parseInt(col_number));
-            chinese_num += (parseInt(obj1.chinese) * parseInt(col_number));
-            chinese_num += (parseInt(obj2.chinese) * parseInt(col_number));
-            english_num += (parseInt(obj1.other) * parseInt(col_number));
-            english_num += (parseInt(obj2.other) * parseInt(col_number));
-            chinese_price += (parseInt(obj1.price_ch) * parseInt(col_number));
-            chinese_price += (parseInt(obj2.price_ch) * parseInt(col_number));
-            english_price += (parseInt(obj1.price_en) * parseInt(col_number));
-            english_price += (parseInt(obj2.price_en) * parseInt(col_number));
-        }
-    });
-
-    // Display final price
-    $('#final_price').text("總金額: " + total_price + "元");
-	return true;
-}
-/*
-$('#save').click(function(){
-	var result = confirm("確定輸入都正確並準備開始估價存檔嗎?");
-	if (result) {
-		var final_json = final_cal();
-		alert(final_json);
-
-	}
-});
-*/
-$('#nosave').click(function(){
-    final_cal();
-	$(".price").css("display", "block");
-	//$('#final_price').text("總價:" + total_price);
-	// 更新到網頁上的 #final_price
-	$('#final_price').html(
-	  "中文共 " + chinese_num + " 字，共 $" + chinese_price + " ，" +
-	  "英文、數字、符號共 " + english_num + " 字，共 $" + english_price + "<br>" +
-	  "總價 <b style='color:red;'>$" + total_price + "</b> ，<b>請下單 <span style='color:red;'>" + (total_price/15) + "</span> 個單位</b>"
-	);
-});
-
-$('#copyButton').click(function() {
-  var text = final_id;
-  var $temp = $('<input>');
-  $('body').append($temp);
-  $temp.val(text).select();
-  document.execCommand('copy');
-  $temp.remove();
-});
-
-// 同步使用者填的 input/select 值到 clone
-function syncInputValues(original, clone) {
-  const originalInputs = original.querySelectorAll('input, select, textarea');
-  const clonedInputs = clone.querySelectorAll('input, select, textarea');
-
-  originalInputs.forEach((origEl, idx) => {
-    const cloneEl = clonedInputs[idx];
-
-    if (!cloneEl) return;
-
-    if (origEl.tagName === 'SELECT') {
-      cloneEl.selectedIndex = origEl.selectedIndex;
-    } else {
-      cloneEl.value = origEl.value;
-    }
-  });
-}
-
-
-// 將表格中的所有 select 與 input 的值，換成文字顯示
-function prepareTableForEmail(tableOrSelector) {
-  let table;
-
-  if (typeof tableOrSelector === "string") {
-    table = document.querySelector(tableOrSelector);
-  } else {
-    table = tableOrSelector;
-  }
-
-  // 替換所有 <select> 為選項文字
-  const selects = table.querySelectorAll('select');
-  selects.forEach(select => {
-    const selectedText = select.options[select.selectedIndex]?.text || '';
-    const span = document.createElement('span');
-    span.textContent = selectedText;
-    select.replaceWith(span);
-  });
-
-  // 替換所有 <input> 為輸入值
-  const inputs = table.querySelectorAll('input');
-  inputs.forEach(input => {
-    const span = document.createElement('span');
-    span.textContent = input.value;
-    input.replaceWith(span);
-  });
-}
-
-function styleTableForEmail(tableOrSelector) {
-  let table;
-
-  // 判斷傳進來的是 selector 還是 DOM
-  if (typeof tableOrSelector === "string") {
-    table = document.querySelector(tableOrSelector);
-  } else {
-    table = tableOrSelector;
-  }
-  
-  table.setAttribute("border", "1");
-  table.setAttribute("cellpadding", "8");
-  table.style.borderCollapse = "collapse";
-  table.style.width = "100%";
-
-  const allCells = table.querySelectorAll("th, td");
-  allCells.forEach(cell => {
-    cell.style.border = "1px solid #000";
-    cell.style.padding = "8px";
-    cell.style.textAlign = "center";
-    cell.style.fontSize = "14px";
-  });
-}
-
-function generateSerialNumber() {
-    const prefix = "ALLEZ_";
-    const now = new Date();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // 月 (01-12)
-    const day = String(now.getDate()).padStart(2, '0');        // 日 (01-31)
-	const hours = String(now.getHours()).padStart(2, '0');
-	const minutes = String(now.getMinutes()).padStart(2, '0');
-	const seconds = String(now.getSeconds()).padStart(2, '0');
-	
-	//產生英文亂數
-	let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // 只用大寫英文
-	let code = "";
-	for (let i = 0; i < 3; i++) {
-		code += chars.charAt(Math.floor(Math.random() * chars.length));
-	}
+const CONFIG = {
+    PRICE_CH: 30,
+    PRICE_EN: 15,
+    STORAGE_KEY: 'embroidery_form_autosave',
+    EMAILJS_KEY: 'u41WSO_Vz4DDKY-hZ',
+    SERVICE_ID: 'service_cou7ucc',
+    TEMPLATE_ID: 'template_ac4gzdw'
+};
+
+let totalPrice = 0;
+
+function fitLayerToContainer(card) {
+    if (!card) return;
+    const layer = card.querySelector('.preview-text-layer');
+    const line1 = card.querySelector('.p-line1');
+    const line2 = card.querySelector('.p-line2');
     
-    // 產生 3 位數亂碼（數字）
-    const randomNum = Math.floor(Math.random() * 1000);     // 0 - 999
-    const randomStr = String(randomNum).padStart(3, '0');       // 補足 3 位
+    if (!layer || !line1 || !line2) return;
 
-    //return prefix + month + day + code + randomStr;
-	return month + day + + hours + minutes + seconds + code;
-}
+    layer.style.transform = "translate(-50%, -50%) scale(1)";
+    line2.style.transform = "scale(1)";
+    
+    requestAnimationFrame(() => {
+        const line2Width = line2.scrollWidth;
+        const maxLine2Width = 50;
+        
+        if (line2Width > maxLine2Width && line2.textContent.trim() !== "") {
+            const scale2 = maxLine2Width / line2Width;
+            line2.style.transform = `scale(${scale2})`;
+        } else {
+            line2.style.transform = "scale(1)";
+        }
 
-$(document).ready(function () {
-    emailjs.init('u41WSO_Vz4DDKY-hZ'); // 換成你的 Public Key
-});
-
-function myConfirm(callback) {
-  const modal = document.getElementById("myConfirm");
-  modal.style.display = "flex";
-
-  document.getElementById("okBtn").onclick = function() {
-    modal.style.display = "none";
-    callback(true);
-  };
-
-  document.getElementById("cancelBtn").onclick = function() {
-    modal.style.display = "none";
-    callback(false);
-  };
-}
-
-// 表單送出
-document.getElementById("orderForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-	
-	// 檢查所有欄位不得為空	
-	/*if (table_item == "" || table_color == "" || parseInt(table_number) <= 0 || table_position == "" || table_font == "" || table_fontcolor == "") {
-	   alert("所有欄位皆為必填, 請重新確認");
-	   return;
-    }*/
-	
-	if (final_cal()) {
-		$(".price").css("display", "block");
-		// 更新到網頁上的 #final_price
-		$('#final_price').html(
-		  "中文共 " + chinese_num + " 字，共 $" + chinese_price + " ，" +
-		  "英文、數字、符號共 " + english_num + " 字，共 $" + english_price + "<br>" +
-		  "總價 <b style='color:red;'>$" + total_price + "</b> ，<b>請下單 <span style='color:red;'>" + (total_price/15) + "</span> 個單位</b>"
-		);
-
-		// 確認送出
-		myConfirm(function(result){
-			if(result) {
-				// 🔒 禁用按鈕 10 秒
-				const submitButton = document.getElementById("save");
-				submitButton.disabled = true;
-				submitButton.textContent = "冷卻10秒中"; // 可選，改變按鈕文字
-
-				setTimeout(() => {
-					submitButton.disabled = false;
-					submitButton.textContent = "估價並送單"; // 恢復原本的按鈕文字
-				}, 10000); // 10 秒 = 10000 毫秒
-
-
-				// 找到原始表格
-				const originalTable = document.querySelector(".table2");
-
-				// 複製一份（不影響畫面上的表格）
-				const clonedTable = originalTable.cloneNode(true);
-
-				// 👇 解決 select/input 值沒跟著複製的問題
-				syncInputValues(originalTable, clonedTable);
-
-				// 對 clone 做靜態化處理
-				prepareTableForEmail(clonedTable);
-				styleTableForEmail(clonedTable);
-
-				// 🔁 把使用者填入的資料轉為靜態文字
-				//prepareTableForEmail(".table2");
-				//styleTableForEmail(".table2");     // 把表格加上格線 & 樣式
-
-				// 取得靜態表格 HTML
-				document.getElementById("table_content").value = clonedTable.outerHTML;
-
-				// 取得使用者輸入的資料
-				const company = document.getElementById("input_company").value;
-				const name = document.getElementById("input_name").value;
-				const phone = document.getElementById("input_phone").value;
-				const email = document.getElementById("input_email").value;
-				const ordernumber = document.getElementById("input_ordernumber").value;
-
-				// 設定到對應的 hidden 欄位
-				document.getElementById("user_company").value = company;
-				document.getElementById("user_name").value = name;
-				document.getElementById("user_phone").value = phone;
-				document.getElementById("user_email").value = email;
-				document.getElementById("user_ordernumber").value = ordernumber;
-				document.getElementById("user_memory").value = total_price;
-
-				const serialNumber = generateSerialNumber();
-				document.getElementById("user_serialnumber").value = serialNumber;
-
-				const constform = document.getElementById("orderForm");
-				// 確認送出
-				emailjs.sendForm('service_cou7ucc', 'template_ac4gzdw', constform)
-				  .then(function (response) {
-
-					document.getElementById("display_serialnumber").textContent = "您的電繡單單號是: " + serialNumber;
-					
-					// 顯示 copy 按鈕
-					const copyBtn = document.getElementById("copyButton");
-					copyBtn.style.display = "inline-block";
-
-					// 儲存電繡單單號到按鈕屬性（供複製用）
-					copyBtn.setAttribute("data-serial", serialNumber);
-					
-					alert('✅ 已成功送出信件！');
-					console.log('成功', response);
-				  }, function (error) {
-					alert('❌ 發送失敗：' + JSON.stringify(error));
-					console.error('錯誤', error);
-				  });
-			}
-		});
-	} else {
-		console.log("資料不完整");
-	}
-});
-
-// 綁定複製按鈕的行為
-document.getElementById("copyButton").addEventListener("click", function () {
-    const serial = this.getAttribute("data-serial");
-
-    // 複製到剪貼簿
-    navigator.clipboard.writeText(serial).then(function () {
-        alert("✅ 已複製單號：" + serial);
-    }, function (err) {
-        alert("❌ 複製失敗：" + err);
+        const line1Width = line1.scrollWidth;
+        const maxGlobalWidth = 180;
+        
+        let globalScale = 1;
+        if (line1Width > maxGlobalWidth) {
+            globalScale = maxGlobalWidth / line1Width;
+        }
+        
+        layer.style.transform = `translate(-50%, -50%) scale(${globalScale})`;
     });
+}
+
+function initMagnifier(row) {
+    const box = row.querySelector('.preview-box');
+    const wrapper = row.querySelector('.zoom-wrapper');
+
+    if (!box || !wrapper) return;
+
+    box.addEventListener('mousemove', (e) => {
+        const rect = box.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const xPercent = (x / rect.width) * 100;
+        const yPercent = (y / rect.height) * 100;
+
+        wrapper.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+        wrapper.style.transform = "scale(2.5)";
+    });
+
+    box.addEventListener('mouseleave', () => {
+        wrapper.style.transform = "scale(1)";
+        setTimeout(() => {
+            if(wrapper.style.transform === "scale(1)") {
+                wrapper.style.transformOrigin = "center center";
+            }
+        }, 100);
+    });
+}
+
+function updateSelectColor(element) {
+    if (!element.value) {
+        element.classList.add("gray-text");
+    } else {
+        element.classList.remove("gray-text");
+    }
+}
+
+function initProductOptions(row = document) {
+    const sel = row.querySelector('.s_product-code');
+    if (!sel) return;
+    sel.innerHTML = '<option value="" selected disabled hidden>請選擇</option>';
+    Object.keys(PRODUCT_DATA.COLORS).sort().forEach(code => {
+        sel.add(new Option(code, code));
+    });
+}
+
+function updateProductOptions(selectEl) {
+    const code = selectEl.value;
+    const card = selectEl.closest('.card-item');
+    const colorSelect = card.querySelector('.s_color');
+    const sleeveSelect = card.querySelector('.s_sleeve');
+
+    colorSelect.innerHTML = '<option value="" selected disabled hidden>請選擇</option>';
+    if (PRODUCT_DATA.COLORS[code]) {
+        Object.entries(PRODUCT_DATA.COLORS[code]).forEach(([key, valObj]) => {
+            colorSelect.add(new Option(valObj.name, key));
+        });
+    }
+
+    sleeveSelect.innerHTML = '<option value="" selected disabled hidden>請選擇</option>';
+    if (PRODUCT_DATA.SLEEVES[code]) {
+        Object.entries(PRODUCT_DATA.SLEEVES[code]).forEach(([key, val]) => {
+            sleeveSelect.add(new Option(val, key));
+        });
+    }
+    
+    updateSelectColor(colorSelect);
+    updateSelectColor(sleeveSelect);
+
+    updateProductImage(card);
+}
+
+function updateProductImage(row) {
+    if (!row) return;
+
+    const pCode = row.querySelector('.s_product-code').value;
+    const cCode = row.querySelector('.s_color').value;
+    
+    const defaultImg = row.querySelector('.default-preview-img');
+    const dynamicImg = row.querySelector('.dynamic-preview-img');
+
+    let imgUrl = null;
+
+    if (pCode && cCode && PRODUCT_DATA.COLORS[pCode] && PRODUCT_DATA.COLORS[pCode][cCode]) {
+        imgUrl = PRODUCT_DATA.COLORS[pCode][cCode].img;
+    }
+
+    if (imgUrl && imgUrl.trim() !== "") {
+        dynamicImg.src = imgUrl;
+        dynamicImg.style.display = 'block';
+        defaultImg.style.display = 'none';
+    } else {
+        dynamicImg.style.display = 'none';
+        dynamicImg.src = "";
+        defaultImg.style.display = 'block';
+    }
+}
+
+function updatePreview(card) {
+    if (!card) return;
+    
+    const posVal = card.querySelector('.s_position').value;
+    const layer = card.querySelector('.preview-text-layer');
+    layer.classList.remove('pos-left', 'pos-right');
+    if (posVal === 'left_chest') layer.classList.add('pos-left');
+    if (posVal === 'right_chest') layer.classList.add('pos-right');
+
+    const colorVal = card.querySelector('.s_embroidery_color').value;
+    const pLines = card.querySelectorAll('.p-text-line');
+    
+    const colorMap = {
+        "700": "#BB1B1B", "535": "#D25012", "525": "#DA8B00", "233": "#3F941F",
+        "367": "#132BCB", "335": "#131B64", "676": "#500898", "745": "#65351E",
+        "900": "#000000", "800": "#FFFFFF", "485": "#A09FA4", "323": "#13A39A"
+    };
+
+    let color = '#d1b786';
+
+    if (colorVal) {
+        const prefix = colorVal.split('_')[0];
+        if (colorMap.hasOwnProperty(prefix)) {
+            color = colorMap[prefix];
+        }
+    }
+    
+    pLines.forEach(el => el.style.color = color);
+
+    ['1', '2'].forEach(idx => {
+        const fontVal = card.querySelector(`.s_font${idx === '1' ? '' : '2'}`).value;
+        const textVal = card.querySelector(`.embroidery${idx}`).value;
+        const previewEl = card.querySelector(`.p-line${idx}`);
+        
+        if (previewEl) {
+            previewEl.textContent = textVal;
+            previewEl.classList.remove('font-kai', 'font-heavy', 'font-script');
+            if (fontVal.includes('kai')) previewEl.classList.add('font-kai');
+            else if (fontVal.includes('heavy')) previewEl.classList.add('font-heavy');
+            else if (fontVal.includes('script')) previewEl.classList.add('font-script');
+        }
+    });
+
+    const txt2Val = card.querySelector('.embroidery2').value;
+    if (!txt2Val || txt2Val.trim() === '') {
+        layer.classList.add('single-line-mode');
+    } else {
+        layer.classList.remove('single-line-mode');
+    }
+
+    fitLayerToContainer(card);
+}
+
+// 簡易 Debounce 防止過度寫入
+let saveTimeout;
+function saveToLocalStorage() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        const data = {
+            company: document.getElementById('input_company').value,
+            name: document.getElementById('input_name').value,
+            phone: document.getElementById('input_phone').value,
+            email: document.getElementById('input_email').value,
+            rows: []
+        };
+        
+        document.querySelectorAll('.card-item').forEach(row => {
+            data.rows.push({
+                product_code: row.querySelector('.s_product-code').value,
+                color: row.querySelector('.s_color').value,
+                sleeve: row.querySelector('.s_sleeve').value,
+                size: row.querySelector('.s_size').value,
+                number: row.querySelector('.i_number').value,
+                position: row.querySelector('.s_position').value,
+                emb_color: row.querySelector('.s_embroidery_color').value,
+                font1: row.querySelector('.s_font').value,
+                txt1: row.querySelector('.embroidery1').value,
+                font2: row.querySelector('.s_font2').value,
+                txt2: row.querySelector('.embroidery2').value
+            });
+        });
+        
+        localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
+    }, 300);
+}
+
+function loadFromLocalStorage() {
+    const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
+    if (!saved) return;
+    
+    try {
+        const data = JSON.parse(saved);
+        if(data.company) document.getElementById('input_company').value = data.company;
+        if(data.name) document.getElementById('input_name').value = data.name;
+        if(data.phone) document.getElementById('input_phone').value = data.phone;
+        if(data.email) document.getElementById('input_email').value = data.email;
+
+        if (data.rows && data.rows.length > 0) {
+            const container = document.getElementById('cardContainer');
+            while (container.querySelectorAll('.card-item').length < data.rows.length) {
+                addRow();
+            }
+            
+            const rows = container.querySelectorAll('.card-item');
+            data.rows.forEach((rowData, index) => {
+                if (index >= rows.length) return;
+                const row = rows[index];
+                const setVal = (sel, val) => { 
+                    const el = row.querySelector(sel); 
+                    if(el) el.value = val || ''; 
+                };
+
+                setVal('.s_product-code', rowData.product_code);
+                updateProductOptions(row.querySelector('.s_product-code'));
+                
+                setVal('.s_color', rowData.color);
+                setVal('.s_sleeve', rowData.sleeve);
+                setVal('.s_size', rowData.size);
+                setVal('.i_number', rowData.number || "1");
+                setVal('.s_position', rowData.position);
+                setVal('.s_embroidery_color', rowData.emb_color);
+                setVal('.s_font', rowData.font1);
+                setVal('.embroidery1', rowData.txt1);
+                setVal('.s_font2', rowData.font2);
+                setVal('.embroidery2', rowData.txt2);
+
+                row.querySelectorAll('select').forEach(updateSelectColor);
+                updatePreview(row);
+                updateProductImage(row);
+            });
+        }
+    } catch (e) {
+        console.error("Auto-fill error:", e);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init(CONFIG.EMAILJS_KEY);
+    } else {
+        console.error("EmailJS failed to load");
+        alert("系統載入異常，請重新整理頁面或稍後再試。");
+    }
+    
+    initProductOptions();
+    
+    document.querySelectorAll('.card-item').forEach(initMagnifier);
+
+    document.getElementById('btnAddRow').addEventListener('click', () => { addRow(); saveToLocalStorage(); });
+    document.getElementById('btnCopyRow').addEventListener('click', () => { copyLastRow(); saveToLocalStorage(); });
+    document.getElementById('btnDelRow').addEventListener('click', () => { delLastRow(); saveToLocalStorage(); });
+    document.getElementById('nosave').addEventListener('click', () => performCalculation(true));
+    document.getElementById('copyButton').addEventListener('click', copySerial);
+    
+    const modal = document.getElementById("myConfirm");
+    const confirmBtn = document.getElementById("okBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+
+    cancelBtn.addEventListener('click', () => {
+        modal.style.display = "none";
+    });
+
+    confirmBtn.addEventListener('click', () => {
+        executeSubmit();
+    });
+
+    const form = document.getElementById('orderForm');
+    form.addEventListener('input', (e) => {
+        if(e.target.matches('input, select')) saveToLocalStorage();
+        if(e.target.matches('.embroidery1, .embroidery2')) updatePreview(e.target.closest('.card-item'));
+    });
+    
+    form.addEventListener('change', (e) => {
+        const row = e.target.closest('.card-item');
+        if (e.target.tagName === 'SELECT') updateSelectColor(e.target);
+        
+        if (e.target.classList.contains('s_product-code')) {
+            updateProductOptions(e.target);
+        }
+        
+        if (e.target.classList.contains('s_color')) {
+            updateProductImage(row);
+        }
+
+        if (e.target.matches('.s_position, .s_font, .s_font2, .s_embroidery_color')) updatePreview(row);
+        saveToLocalStorage();
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!performCalculation(true)) return;
+        modal.style.display = "flex";
+    });
+
+    document.querySelectorAll('select').forEach(updateSelectColor);
+    loadFromLocalStorage();
 });
 
+function addRow() {
+    const container = document.getElementById('cardContainer');
+    const template = container.querySelector('.td2_row');
+    const newRow = template.cloneNode(true);
+    
+    initProductOptions(newRow);
+
+    newRow.querySelectorAll('input').forEach(input => input.value = input.type === 'number' ? '1' : '');
+    newRow.querySelectorAll('select').forEach(select => {
+        select.value = "";
+        if (select.matches('.s_color, .s_sleeve')) select.innerHTML = '<option value="">請選擇</option>';
+        updateSelectColor(select);
+    });
+    
+    const textLayer = newRow.querySelector('.preview-text-layer');
+    textLayer.className = 'preview-text-layer';
+    textLayer.classList.add('single-line-mode');
+    textLayer.style.transform = 'translate(-50%, -50%) scale(1)';
+    
+    newRow.querySelectorAll('.p-text-line').forEach(el => {
+        el.textContent = '';
+        el.style.color = '#d1b786';
+        el.className = el.classList.contains('p-line1') ? 'p-text-line p-line1' : 'p-text-line p-line2';
+        el.style.transform = 'scale(1)';
+    });
+
+    const defaultImg = newRow.querySelector('.default-preview-img');
+    const dynamicImg = newRow.querySelector('.dynamic-preview-img');
+    dynamicImg.src = "";
+    dynamicImg.style.display = "none";
+    defaultImg.style.display = "block";
+    
+    initMagnifier(newRow);
+
+    container.appendChild(newRow);
+    reIndex();
+}
+
+function copyLastRow() {
+    const container = document.getElementById('cardContainer');
+    const rows = container.querySelectorAll('.td2_row');
+    const lastRow = rows[rows.length - 1];
+    const newRow = lastRow.cloneNode(true);
+    
+    const origSelects = lastRow.querySelectorAll('select');
+    newRow.querySelectorAll('select').forEach((sel, idx) => {
+        sel.value = origSelects[idx].value;
+        updateSelectColor(sel);
+    });
+    
+    const origInputs = lastRow.querySelectorAll('input');
+    newRow.querySelectorAll('input').forEach((inp, idx) => inp.value = origInputs[idx].value);
+
+    updatePreview(newRow);
+    updateProductImage(newRow);
+    
+    initMagnifier(newRow);
+
+    container.appendChild(newRow);
+    reIndex();
+}
+
+function delLastRow() {
+    const rows = document.querySelectorAll('.td2_row');
+    if (rows.length > 1) {
+        rows[rows.length - 1].remove();
+        reIndex();
+    }
+}
+
+function reIndex() {
+    const rows = document.querySelectorAll('.td2_row');
+    rows.forEach((row, index) => {
+        const indexDiv = row.querySelector('.card-index');
+        if (indexDiv) {
+            indexDiv.textContent = index + 1;
+        }
+    });
+}
+
+function performCalculation(showErrors = true) {
+    let currentTotal = 0, chNum = 0, enNum = 0, chPrice = 0, enPrice = 0;
+    let errors = [];
+    let focusEl = null;
+
+    ['input_company', 'input_name', 'input_phone', 'input_email'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el.value.trim()) {
+            errors.push(`${el.previousElementSibling.textContent} 未填寫`);
+            if (!focusEl) focusEl = el;
+        }
+    });
+
+    document.querySelectorAll('.td2_row').forEach((row, idx) => {
+        const rowNum = idx + 1;
+        const getVal = (cls) => row.querySelector(cls)?.value || "";
+        
+        if (!getVal('.s_product-code')) errors.push(`第 ${rowNum} 項：商品貨號未選擇`);
+        if (!getVal('.s_color')) errors.push(`第 ${rowNum} 項：顏色未選擇`);
+        if (!getVal('.s_sleeve')) errors.push(`第 ${rowNum} 項：袖長未選擇`);
+        if (!getVal('.s_size')) errors.push(`第 ${rowNum} 項：尺寸未選擇`);
+        if (parseInt(getVal('.i_number')) <= 0) errors.push(`第 ${rowNum} 項：件數必須大於 0`);
+        if (!getVal('.s_position')) errors.push(`第 ${rowNum} 項：位置未選擇`);
+        if (!getVal('.s_embroidery_color')) errors.push(`第 ${rowNum} 項：繡線顏色未選擇`);
+        if (!getVal('.s_font')) errors.push(`第 ${rowNum} 項：字體(一)未選擇`);
+        
+        const txt1 = getVal('.embroidery1');
+        const txt2 = getVal('.embroidery2');
+        const font2 = getVal('.s_font2');
+        
+        const isTooLong = (t) => t && (/[\u4E00-\u9FA5]/.test(t) ? t.length > 6 : t.length > 20);
+
+        if (!txt1) {
+            errors.push(`第 ${rowNum} 項：內容(一)為必填`);
+        } else if (isTooLong(txt1)) {
+            errors.push(`第 ${rowNum} 項內容(一)過長(中6/英20)`);
+        }
+
+        if (font2) {
+            if (!txt2) {
+                errors.push(`第 ${rowNum} 項的內容(第二行)內容為空白`);
+            } else {
+                if (isTooLong(txt2)) {
+                    errors.push(`第 ${rowNum} 項內容(二)過長(中6/英20)`);
+                }
+            }
+        } else {
+            if (txt2) {
+                errors.push(`第 ${rowNum} 項：有填寫內容(二)則必須選擇字體`);
+            }
+        }
+
+        [txt1, txt2].forEach(txt => {
+            let cCh = 0, cEn = 0;
+            if (txt) {
+                for (const char of txt) {
+                    if (/[\u4E00-\u9FA5]/.test(char)) cCh++;
+                    else if (char !== ' ' && char !== '　') cEn++;
+                }
+            }
+            const num = parseInt(getVal('.i_number')) || 0;
+            chNum += cCh * num; enNum += cEn * num;
+            chPrice += cCh * CONFIG.PRICE_CH * num;
+            enPrice += cEn * CONFIG.PRICE_EN * num;
+        });
+    });
+
+    if (showErrors && errors.length > 0) {
+        alert(errors.join('\n'));
+        if (focusEl) focusEl.focus();
+        return false;
+    }
+
+    totalPrice = chPrice + enPrice;
+    if (showErrors) {
+        document.getElementById('final_price').innerHTML = 
+            `中文共 ${chNum} 字 ($${chPrice})，英數符號共 ${enNum} 字 ($${enPrice})<br>` +
+            `總價 <b style='color:#c62828;'>$${totalPrice}</b>，請下單 <span style='color:#c62828;'>${Math.ceil(totalPrice/15)}</span> 個單位`;
+    }
+    return true;
+}
+
+function generateEmailTableHTML() {
+    const escape = (str) => (str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const getTxt = (row, cls) => {
+        const sel = row.querySelector(cls);
+        return sel && sel.selectedIndex >= 0 ? escape(sel.options[sel.selectedIndex].text) : "";
+    };
+
+    let html = `<table style="width:100%; border-collapse:collapse; border:1px solid #ccc; font-size:13px;"><thead><tr style="background:#173064; color:#fff;">`;
+    ['項次','貨號','顏色','袖長','尺寸','件數','位置','繡線','字體1','內容1','字體2','內容2'].forEach(h => html += `<th style="padding:8px; border:1px solid #ccc;">${h}</th>`);
+    html += `</tr></thead><tbody>`;
+
+    let totalQty = 0;
+    document.querySelectorAll('.td2_row').forEach((row, idx) => {
+        const qty = parseInt(row.querySelector('.i_number').value) || 0;
+        totalQty += qty;
+        html += `<tr style="background:${idx%2===0 ? '#f9f9f9':'#fff'}">`;
+        html += `<td style="padding:8px; border:1px solid #ccc; text-align:center;">${idx+1}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_product-code')}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_color')}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_sleeve')}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_size')}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc; font-weight:bold; text-align:center;">${qty}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_position')}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_embroidery_color')}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_font')}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc; color:#c62828;">${escape(row.querySelector('.embroidery1').value)}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc;">${getTxt(row, '.s_font2')}</td>`;
+        html += `<td style="padding:8px; border:1px solid #ccc; color:#c62828;">${escape(row.querySelector('.embroidery2').value)}</td>`;
+        html += `</tr>`;
+    });
+    html += `</tbody></table>`;
+    html += `<div style="margin-top:20px; padding:15px; background:#eee;"><p>總件數: ${totalQty}</p><p>總金額: <b style="color:#c62828; font-size:18px;">$${totalPrice}</b></p></div>`;
+    return html;
+}
+
+function executeSubmit() {
+    const modal = document.getElementById("myConfirm");
+    modal.style.display = "none";
+    const btn = document.getElementById("save");
+    btn.disabled = true;
+    btn.textContent = "傳送中...";
+
+    const serial = "AL" + new Date().toISOString().replace(/[-:T.]/g, "").slice(2, 12) + Math.random().toString(36).substr(2, 3).toUpperCase();
+    
+    document.getElementById("user_serialnumber" ).value = serial;
+    document.getElementById("table_content").value = generateEmailTableHTML();
+
+    emailjs.sendForm(CONFIG.SERVICE_ID, CONFIG.TEMPLATE_ID, "#orderForm")
+        .then(() => {
+            localStorage.removeItem(CONFIG.STORAGE_KEY);
+            alert('✅ 已成功送出！');
+            const disp = document.getElementById("display_serialnumber");
+            disp.innerHTML = `您的電繡單單號是: <b>${serial}</b>`;
+            disp.style.display = "block";
+            document.querySelector(".price").style.display = "block";
+            document.getElementById("copyButton").setAttribute("data-serial", serial);
+            btn.textContent = "已送出";
+            setTimeout(() => { btn.disabled = false; btn.textContent = "估價並送單"; }, 5000);
+        })
+        .catch(err => {
+            console.error(err);
+            alert('❌ 發送失敗，請檢查網路連線或稍後再試。');
+            btn.disabled = false;
+            btn.textContent = "估價並送單";
+        });
+}
+
+function copySerial() {
+    const serial = this.getAttribute("data-serial");
+    if (!serial) return;
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(serial).then(() => alert("✅ 已複製單號")).catch(() => promptCopy(serial));
+    } else {
+        promptCopy(serial);
+    }
+}
+
+function promptCopy(text) {
+    prompt("請手動複製單號:", text);
+}
 </script>
-
+</body>
 </html>
-
-
-
